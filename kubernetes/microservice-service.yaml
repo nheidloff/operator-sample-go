@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapplication1-service-microservice
+  labels:
+    app: myapplication
+spec:
+  ports:
+  - nodePort: 30548
+    port: 8081
+    protocol: TCP
+    targetPort: 8081
+  selector:
+    app: myapplication
+  sessionAffinity: None
+  type: NodePort

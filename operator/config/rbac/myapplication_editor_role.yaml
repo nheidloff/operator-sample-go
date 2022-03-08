@@ -1,0 +1,24 @@
+# permissions for end users to edit myapplications.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: myapplication-editor-role
+rules:
+- apiGroups:
+  - cache.nheidloff
+  resources:
+  - myapplications
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - cache.nheidloff
+  resources:
+  - myapplications/status
+  verbs:
+  - get

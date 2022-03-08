@@ -1,0 +1,7 @@
+apiVersion: cache.nheidloff/v1alpha1
+kind: MyApplication
+metadata:
+  name: myapplication1
+  namespace: test1
+spec:
+  size: 1
