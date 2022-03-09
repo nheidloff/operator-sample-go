@@ -34,6 +34,7 @@ import (
 	cachev1alpha1 "github.com/nheidloff/operator-sample-go/api/v1alpha1"
 	"github.com/nheidloff/operator-sample-go/controllers"
 	//+kubebuilder:scaffold:imports
+	//database "github.com/nheidloff/operator-sample-go/operator-database/controllers"
 )
 
 var (
@@ -42,6 +43,8 @@ var (
 )
 
 func init() {
+	//utilruntime.Must(database.AddToScheme(scheme))
+
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
 	utilruntime.Must(cachev1alpha1.AddToScheme(scheme))

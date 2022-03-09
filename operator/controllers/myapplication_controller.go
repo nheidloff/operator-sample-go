@@ -72,7 +72,18 @@ func (reconciler *MyApplicationReconciler) Reconcile(ctx context.Context, req ct
 	fmt.Printf("Size: %d\n", myApplication.Spec.Size)
 
 	setGlobalVariables(myApplication)
-
+	/*
+		externalDatabase := database.GroupName
+		err = reconciler.Get(ctx, types.NamespacedName{Name: "externaldatabase", Namespace: myApplication.Namespace}, externalDatabase)
+		if err != nil {
+			fmt.Println("ungleich nil")
+			if errors.IsNotFound(err) {
+				fmt.Println("nicht gefunden")
+			}
+		} else {
+			fmt.Println("ungleich nil")
+		}
+	*/
 	secret := &corev1.Secret{}
 	err = reconciler.Get(ctx, types.NamespacedName{Name: secretName, Namespace: myApplication.Namespace}, secret)
 	if err != nil {
