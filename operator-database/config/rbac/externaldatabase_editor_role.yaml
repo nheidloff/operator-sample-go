@@ -1,0 +1,24 @@
+# permissions for end users to edit externaldatabases.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: externaldatabase-editor-role
+rules:
+- apiGroups:
+  - cache.nheidloff
+  resources:
+  - externaldatabases
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - cache.nheidloff
+  resources:
+  - externaldatabases/status
+  verbs:
+  - get

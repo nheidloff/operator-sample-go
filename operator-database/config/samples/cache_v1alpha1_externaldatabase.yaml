@@ -1,0 +1,9 @@
+apiVersion: cache.nheidloff/v1alpha1
+kind: ExternalDatabase
+metadata:
+  name: externaldatabase
+spec:
+  user: name4
+  password: password
+  url: url
+  certificate: certificate

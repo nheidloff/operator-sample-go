@@ -4,4 +4,4 @@ metadata:
   name: myapplication1
   namespace: test1
 spec:
-  size: 1
+  size: 2
