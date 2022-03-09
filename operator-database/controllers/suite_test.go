@@ -30,7 +30,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	cachev1alpha1 "github.com/nheidloff/operator-database/api/v1alpha1"
+	cachev1alpha1 "github.com/nheidloff/operator-sample-go/operator-database/api/v1alpha1"
 	//+kubebuilder:scaffold:imports
 )
 

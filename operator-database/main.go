@@ -31,8 +31,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	cachev1alpha1 "github.com/nheidloff/operator-database/api/v1alpha1"
-	"github.com/nheidloff/operator-database/controllers"
+	cachev1alpha1 "github.com/nheidloff/operator-sample-go/operator-database/api/v1alpha1"
+	"github.com/nheidloff/operator-sample-go/operator-database/controllers"
 	//+kubebuilder:scaffold:imports
 )
 
