@@ -52,7 +52,7 @@ func (reconciler *MyApplicationReconciler) Reconcile(ctx context.Context, req ct
 	if err != nil {
 		if errors.IsNotFound(err) {
 			log.Info("Secret resource " + secretName + " not found. Creating or re-creating secret")
-			secretDefinition := reconciler.buildSecret(myApplication, secretName, "GREETING_MESSAGE", greetingMessage)
+			secretDefinition := reconciler.defineSecret(myApplication, secretName, "GREETING_MESSAGE", greetingMessage)
 			err = reconciler.Create(ctx, secretDefinition)
 			if err != nil {
 				log.Info("Failed to create secret resource. Re-running reconcile.")
@@ -70,7 +70,7 @@ func (reconciler *MyApplicationReconciler) Reconcile(ctx context.Context, req ct
 	if err != nil {
 		if errors.IsNotFound(err) {
 			log.Info("Deployment resource " + deploymentName + " not found. Creating or re-creating deployment")
-			deploymentDefinition := reconciler.buildDeployment(myApplication)
+			deploymentDefinition := reconciler.defineDeployment(myApplication)
 			err = reconciler.Create(ctx, deploymentDefinition)
 			if err != nil {
 				log.Info("Failed to create deployment resource. Re-running reconcile.")
@@ -88,7 +88,7 @@ func (reconciler *MyApplicationReconciler) Reconcile(ctx context.Context, req ct
 	if err != nil {
 		if errors.IsNotFound(err) {
 			log.Info("Service resource " + serviceName + " not found. Creating or re-creating service")
-			serviceDefinition := reconciler.buildService(myApplication)
+			serviceDefinition := reconciler.defineService(myApplication)
 			err = reconciler.Create(ctx, serviceDefinition)
 			if err != nil {
 				log.Info("Failed to create service resource. Re-running reconcile.")
@@ -110,7 +110,7 @@ func (reconciler *MyApplicationReconciler) SetupWithManager(mgr ctrl.Manager) er
 		Complete(reconciler)
 }
 
-func (reconciler *MyApplicationReconciler) buildService(myApplication *cachev1alpha1.MyApplication) *corev1.Service {
+func (reconciler *MyApplicationReconciler) defineService(myApplication *cachev1alpha1.MyApplication) *corev1.Service {
 	labels := map[string]string{"app": "myapplication"}
 	serviceName := myApplication.Name + "-service-microservice"
 	var port int32 = 8081
@@ -137,7 +137,7 @@ func (reconciler *MyApplicationReconciler) buildService(myApplication *cachev1al
 	return service
 }
 
-func (reconciler *MyApplicationReconciler) buildSecret(myApplication *cachev1alpha1.MyApplication, name string, key string, value string) *corev1.Secret {
+func (reconciler *MyApplicationReconciler) defineSecret(myApplication *cachev1alpha1.MyApplication, name string, key string, value string) *corev1.Secret {
 	stringData := make(map[string]string)
 	stringData[key] = value
 
@@ -154,7 +154,7 @@ func (reconciler *MyApplicationReconciler) buildSecret(myApplication *cachev1alp
 	return secret
 }
 
-func (reconciler *MyApplicationReconciler) buildDeployment(myApplication *cachev1alpha1.MyApplication) *appsv1.Deployment {
+func (reconciler *MyApplicationReconciler) defineDeployment(myApplication *cachev1alpha1.MyApplication) *appsv1.Deployment {
 	replicas := myApplication.Spec.Size
 	deploymentName := myApplication.Name + "-deployment-microservice"
 	secretName := myApplication.Name + "-secret-greeting"
