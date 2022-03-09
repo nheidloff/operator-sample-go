@@ -12,5 +12,4 @@ spec:
     targetPort: 8081
   selector:
     app: myapplication
-  sessionAffinity: None
   type: NodePort

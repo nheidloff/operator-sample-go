@@ -38,4 +38,3 @@ kubectl delete -f kubernetes/microservice-service.yaml
 kubectl delete -f kubernetes/microservice-deployment.yaml 
 kubectl delete -f kubernetes/secret.yaml
 
-make build run

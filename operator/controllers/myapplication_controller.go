@@ -53,7 +53,7 @@ func (reconciler *MyApplicationReconciler) Reconcile(ctx context.Context, req ct
 		if errors.IsNotFound(err) {
 			log.Info("Secret resource " + secretName + " not found. Creating or re-creating secret")
 			secretDefinition := reconciler.buildSecret(myApplication, secretName, "GREETING_MESSAGE", greetingMessage)
-			err = reconciler.Create(context.TODO(), secretDefinition)
+			err = reconciler.Create(ctx, secretDefinition)
 			if err != nil {
 				log.Info("Failed to create secret resource. Re-running reconcile.")
 				return ctrl.Result{}, err
@@ -71,13 +71,31 @@ func (reconciler *MyApplicationReconciler) Reconcile(ctx context.Context, req ct
 		if errors.IsNotFound(err) {
 			log.Info("Deployment resource " + deploymentName + " not found. Creating or re-creating deployment")
 			deploymentDefinition := reconciler.buildDeployment(myApplication)
-			err = reconciler.Create(context.TODO(), deploymentDefinition)
+			err = reconciler.Create(ctx, deploymentDefinition)
 			if err != nil {
 				log.Info("Failed to create deployment resource. Re-running reconcile.")
 				return ctrl.Result{}, err
 			}
 		} else {
 			log.Info("Failed to get deployment resource " + deploymentName + ". Re-running reconcile.")
+			return ctrl.Result{}, err
+		}
+	}
+
+	service := &corev1.Service{}
+	serviceName := myApplication.Name + "-service-microservice"
+	err = reconciler.Get(ctx, types.NamespacedName{Name: serviceName, Namespace: myApplication.Namespace}, service)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			log.Info("Service resource " + serviceName + " not found. Creating or re-creating service")
+			serviceDefinition := reconciler.buildService(myApplication)
+			err = reconciler.Create(ctx, serviceDefinition)
+			if err != nil {
+				log.Info("Failed to create service resource. Re-running reconcile.")
+				return ctrl.Result{}, err
+			}
+		} else {
+			log.Info("Failed to get service resource " + serviceName + ". Re-running reconcile.")
 			return ctrl.Result{}, err
 		}
 	}
@@ -90,6 +108,33 @@ func (reconciler *MyApplicationReconciler) SetupWithManager(mgr ctrl.Manager) er
 		For(&cachev1alpha1.MyApplication{}).
 		Owns(&appsv1.Deployment{}).
 		Complete(reconciler)
+}
+
+func (reconciler *MyApplicationReconciler) buildService(myApplication *cachev1alpha1.MyApplication) *corev1.Service {
+	labels := map[string]string{"app": "myapplication"}
+	serviceName := myApplication.Name + "-service-microservice"
+	var port int32 = 8081
+	var nodePort int32 = 30548
+
+	service := &corev1.Service{
+		TypeMeta:   metav1.TypeMeta{APIVersion: "v1", Kind: "Service"},
+		ObjectMeta: metav1.ObjectMeta{Name: serviceName, Namespace: myApplication.Namespace, Labels: labels},
+		Spec: corev1.ServiceSpec{
+			Type: corev1.ServiceTypeNodePort,
+			Ports: []corev1.ServicePort{{
+				Port:     port,
+				NodePort: nodePort,
+				Protocol: "TCP",
+				TargetPort: intstr.IntOrString{
+					IntVal: port,
+				},
+			}},
+			Selector: labels,
+		},
+	}
+
+	ctrl.SetControllerReference(myApplication, service, reconciler.Scheme)
+	return service
 }
 
 func (reconciler *MyApplicationReconciler) buildSecret(myApplication *cachev1alpha1.MyApplication, name string, key string, value string) *corev1.Secret {
@@ -113,6 +158,10 @@ func (reconciler *MyApplicationReconciler) buildDeployment(myApplication *cachev
 	replicas := myApplication.Spec.Size
 	deploymentName := myApplication.Name + "-deployment-microservice"
 	secretName := myApplication.Name + "-secret-greeting"
+	labels := map[string]string{"app": "myapplication"}
+	image := "docker.io/nheidloff/simple-microservice:latest"
+	containerName := "microservice"
+	port := 8081
 
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -122,18 +171,18 @@ func (reconciler *MyApplicationReconciler) buildDeployment(myApplication *cachev
 		Spec: appsv1.DeploymentSpec{
 			Replicas: &replicas,
 			Selector: &metav1.LabelSelector{
-				MatchLabels: map[string]string{"app": "myapplication"},
+				MatchLabels: labels,
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: map[string]string{"app": "myapplication"},
+					Labels: labels,
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{{
-						Image: "docker.io/nheidloff/simple-microservice:latest",
-						Name:  "microservice",
+						Image: image,
+						Name:  containerName,
 						Ports: []corev1.ContainerPort{{
-							ContainerPort: 8081,
+							ContainerPort: int32(port),
 						}},
 						Env: []corev1.EnvVar{{
 							Name: "GREETING_MESSAGE",
@@ -148,13 +197,13 @@ func (reconciler *MyApplicationReconciler) buildDeployment(myApplication *cachev
 						},
 						ReadinessProbe: &v1.Probe{
 							Handler: v1.Handler{
-								HTTPGet: &v1.HTTPGetAction{Path: "/q/health/live", Port: intstr.FromInt(8081)},
+								HTTPGet: &v1.HTTPGetAction{Path: "/q/health/live", Port: intstr.FromInt(port)},
 							},
 							InitialDelaySeconds: 20,
 						},
 						LivenessProbe: &v1.Probe{
 							Handler: v1.Handler{
-								HTTPGet: &v1.HTTPGetAction{Path: "/q/health/ready", Port: intstr.FromInt(8081)},
+								HTTPGet: &v1.HTTPGetAction{Path: "/q/health/ready", Port: intstr.FromInt(port)},
 							},
 							InitialDelaySeconds: 40,
 						},
