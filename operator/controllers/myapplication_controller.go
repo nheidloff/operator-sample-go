@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"k8s.io/client-go/discovery"
+	"k8s.io/client-go/rest"
+
 	cachev1alpha1 "github.com/nheidloff/operator-sample-go/api/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -23,6 +26,8 @@ type MyApplicationReconciler struct {
 	Scheme *runtime.Scheme
 }
 
+var managerConfig *rest.Config
+
 //+kubebuilder:rbac:groups=cache.nheidloff,resources=myapplications,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=cache.nheidloff,resources=myapplications/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=cache.nheidloff,resources=myapplications/finalizers,verbs=update
@@ -39,6 +44,11 @@ func (reconciler *MyApplicationReconciler) Reconcile(ctx context.Context, req ct
 		}
 		log.Info("Failed to get MyApplication resource. Re-running reconcile.")
 		return ctrl.Result{}, err
+	}
+
+	if checkPrerequisites() == false {
+		log.Info("Prerequisites not fulfilled")
+		return ctrl.Result{}, fmt.Errorf("Prerequisites not fulfilled")
 	}
 
 	fmt.Printf("Name: %s\n", myApplication.Name)
@@ -104,9 +114,13 @@ func (reconciler *MyApplicationReconciler) Reconcile(ctx context.Context, req ct
 }
 
 func (reconciler *MyApplicationReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	managerConfig = mgr.GetConfig()
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&cachev1alpha1.MyApplication{}).
 		Owns(&appsv1.Deployment{}).
+		Owns(&corev1.Service{}).
+		Owns(&corev1.Secret{}).
 		Complete(reconciler)
 }
 
@@ -214,4 +228,29 @@ func (reconciler *MyApplicationReconciler) defineDeployment(myApplication *cache
 	}
 	ctrl.SetControllerReference(myApplication, deployment, reconciler.Scheme)
 	return deployment
+}
+
+var kubernetesServerVersion string
+var runsOnOpenShift bool = false
+
+func checkPrerequisites() bool {
+	discoveryClient, err := discovery.NewDiscoveryClientForConfig(managerConfig)
+	if err == nil {
+		serverVersion, err := discoveryClient.ServerVersion()
+		if err == nil {
+			kubernetesServerVersion = serverVersion.String()
+			fmt.Println("Kubernetes Server Version: " + kubernetesServerVersion)
+
+			apiGroup, _, err := discoveryClient.ServerGroupsAndResources()
+			if err == nil {
+				for i := 0; i < len(apiGroup); i++ {
+					if apiGroup[i].Name == "route.openshift.io" {
+						runsOnOpenShift = true
+					}
+				}
+			}
+		}
+	}
+	// TODO: check correct Kubernetes version and distro
+	return true
 }
