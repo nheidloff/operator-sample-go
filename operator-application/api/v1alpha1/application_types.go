@@ -5,10 +5,14 @@ import (
 )
 
 type ApplicationSpec struct {
+	//+kubebuilder:default:="1.0.0"
 	Version string `json:"version,omitempty"`
 	//+kubebuilder:validation:Minimum=0
-	AmountPods        int32  `json:"amountPods"`
-	DatabaseName      string `json:"databaseName,omitempty"`
+	//+kubebuilder:default:=1
+	AmountPods int32 `json:"amountPods"`
+	// +kubebuilder:default:="database"
+	DatabaseName string `json:"databaseName,omitempty"`
+	// +kubebuilder:default:="database"
 	DatabaseNamespace string `json:"databaseNamespace,omitempty"`
 }
 

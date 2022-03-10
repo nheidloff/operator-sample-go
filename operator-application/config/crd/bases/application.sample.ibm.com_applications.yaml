@@ -34,14 +34,18 @@ spec:
           spec:
             properties:
               amountPods:
+                default: 1
                 format: int32
                 minimum: 0
                 type: integer
               databaseName:
+                default: database
                 type: string
               databaseNamespace:
+                default: database
                 type: string
               version:
+                default: 1.0.0
                 type: string
             required:
             - amountPods

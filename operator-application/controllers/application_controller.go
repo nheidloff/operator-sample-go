@@ -40,7 +40,7 @@ var labelValue = "myapplication"
 var greetingMessage = "World"
 var secretGreetingMessageLabel = "GREETING_MESSAGE"
 
-// database properties are hardcoded for demo purposes
+// for simplication purposes database properties are hardcoded
 var databaseUser string = "name"
 var databasePassword string = "password"
 var databaseUrl string = "url"
@@ -87,11 +87,11 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 	setGlobalVariables(application)
 
 	database := &databasesamplev1alpha1.Database{}
+	databaseDefinition := reconciler.defineDatabase(application)
 	err = reconciler.Get(ctx, types.NamespacedName{Name: application.Spec.DatabaseName, Namespace: application.Spec.DatabaseNamespace}, database)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			log.Info("Database resource " + application.Spec.DatabaseName + " not found. Creating or re-creating database")
-			databaseDefinition := reconciler.defineDatabase(application)
 			err = reconciler.Create(ctx, databaseDefinition)
 			if err != nil {
 				log.Info("Failed to create database resource. Re-running reconcile.")
@@ -104,11 +104,11 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 	}
 
 	secret := &corev1.Secret{}
+	secretDefinition := reconciler.defineSecret(application)
 	err = reconciler.Get(ctx, types.NamespacedName{Name: secretName, Namespace: application.Namespace}, secret)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			log.Info("Secret resource " + secretName + " not found. Creating or re-creating secret")
-			secretDefinition := reconciler.defineSecret(application)
 			err = reconciler.Create(ctx, secretDefinition)
 			if err != nil {
 				log.Info("Failed to create secret resource. Re-running reconcile.")
@@ -118,14 +118,16 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 			log.Info("Failed to get secret resource " + secretName + ". Re-running reconcile.")
 			return ctrl.Result{}, err
 		}
+	} else {
+		// for simplication purposes secrets are not updated - see deployment
 	}
 
 	deployment := &appsv1.Deployment{}
+	deploymentDefinition := reconciler.defineDeployment(application)
 	err = reconciler.Get(ctx, types.NamespacedName{Name: deploymentName, Namespace: application.Namespace}, deployment)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			log.Info("Deployment resource " + deploymentName + " not found. Creating or re-creating deployment")
-			deploymentDefinition := reconciler.defineDeployment(application)
 			err = reconciler.Create(ctx, deploymentDefinition)
 			if err != nil {
 				log.Info("Failed to create deployment resource. Re-running reconcile.")
@@ -135,14 +137,28 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 			log.Info("Failed to get deployment resource " + deploymentName + ". Re-running reconcile.")
 			return ctrl.Result{}, err
 		}
+	} else {
+		// TODO: use hash of the spec sections to check whether deployed resource needs to be updated
+		// e.g. https://github.com/kubernetes/kubernetes/blob/master/pkg/util/hash/hash.go
+
+		var currentPointer *int32 = deployment.Spec.Replicas
+		var current int32 = *currentPointer
+		var expected int32 = application.Spec.AmountPods
+		if current != expected {
+			err = reconciler.Update(ctx, deploymentDefinition)
+			if err != nil {
+				log.Info("Failed to update deployment resource. Re-running reconcile.")
+				return ctrl.Result{}, err
+			}
+		}
 	}
 
+	serviceDefinition := reconciler.defineService(application)
 	service := &corev1.Service{}
 	err = reconciler.Get(ctx, types.NamespacedName{Name: serviceName, Namespace: application.Namespace}, service)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			log.Info("Service resource " + serviceName + " not found. Creating or re-creating service")
-			serviceDefinition := reconciler.defineService(application)
 			err = reconciler.Create(ctx, serviceDefinition)
 			if err != nil {
 				log.Info("Failed to create service resource. Re-running reconcile.")
@@ -152,6 +168,8 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 			log.Info("Failed to get service resource " + serviceName + ". Re-running reconcile.")
 			return ctrl.Result{}, err
 		}
+	} else {
+		// for simplication purposes secrets are not updated - see deployment
 	}
 
 	return ctrl.Result{}, nil
