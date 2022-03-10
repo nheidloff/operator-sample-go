@@ -63,7 +63,7 @@ type ApplicationReconciler struct {
 }
 
 //+kubebuilder:rbac:groups=application.sample.ibm.com,resources=applications,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=application.sample.ibm.com,resources=applications/status,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=application.sample.ibm.com,resources=applications/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=application.sample.ibm.com,resources=applications/finalizers,verbs=update
 func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := log.FromContext(ctx)
@@ -389,15 +389,28 @@ func (reconciler *ApplicationReconciler) finalizeApplication(ctx context.Context
 
 func (reconciler *ApplicationReconciler) appendCondition(ctx context.Context, application *applicationsamplev1alpha1.Application,
 	typeName string, status metav1.ConditionStatus, reason string, message string) error {
-	condition := metav1.Condition{Type: typeName, Status: status, Reason: reason, Message: message}
-	application.Status.Conditions = append(application.Status.Conditions, condition)
-	application.Status.SchemaCreated = true // for debugging only
-	// TODO: update is successful, but status is not updated. access rights issue?
-	err := reconciler.Update(ctx, application)
-	if err != nil {
-		fmt.Println("Application resource update: failure")
-	} else {
-		fmt.Println("Application resource update: success ")
+
+	if !reconciler.containsCondition(ctx, application, reason) {
+		time := metav1.Time{Time: time.Now()}
+		condition := metav1.Condition{Type: typeName, Status: status, Reason: reason, Message: message, LastTransitionTime: time}
+		application.Status.Conditions = append(application.Status.Conditions, condition)
+
+		err := reconciler.Client.Status().Update(ctx, application)
+		if err != nil {
+			fmt.Println("Application resource status update failed")
+		}
 	}
 	return nil
+}
+
+func (reconciler *ApplicationReconciler) containsCondition(ctx context.Context,
+	application *applicationsamplev1alpha1.Application, reason string) bool {
+
+	output := false
+	for _, condition := range application.Status.Conditions {
+		if condition.Reason == reason {
+			output = true
+		}
+	}
+	return output
 }

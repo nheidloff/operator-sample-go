@@ -28,10 +28,6 @@ rules:
   resources:
   - applications/status
   verbs:
-  - create
-  - delete
   - get
-  - list
   - patch
   - update
-  - watch
