@@ -40,10 +40,11 @@ var labelValue = "myapplication"
 var greetingMessage = "World"
 var secretGreetingMessageLabel = "GREETING_MESSAGE"
 
-var databaseUser string
-var databasePassword string
-var databaseUrl string
-var databaseCertificate string
+// database properties are hardcoded for demo purposes
+var databaseUser string = "name"
+var databasePassword string = "password"
+var databaseUrl string = "url"
+var databaseCertificate string = "certificate"
 
 var managerConfig *rest.Config
 
@@ -88,13 +89,18 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 	database := &databasesamplev1alpha1.Database{}
 	err = reconciler.Get(ctx, types.NamespacedName{Name: application.Spec.DatabaseName, Namespace: application.Spec.DatabaseNamespace}, database)
 	if err != nil {
-		fmt.Println("Access Database: Error! err != nil")
 		if errors.IsNotFound(err) {
-			fmt.Println("Access Database: Error! errors.IsNotFound")
+			log.Info("Database resource " + application.Spec.DatabaseName + " not found. Creating or re-creating database")
+			databaseDefinition := reconciler.defineDatabase(application)
+			err = reconciler.Create(ctx, databaseDefinition)
+			if err != nil {
+				log.Info("Failed to create database resource. Re-running reconcile.")
+				return ctrl.Result{}, err
+			}
+		} else {
+			log.Info("Failed to get database resource " + application.Spec.DatabaseName + ". Re-running reconcile.")
+			return ctrl.Result{}, err
 		}
-	} else {
-		fmt.Println("Access Database: Success! err == nil")
-		fmt.Println("Access Database: Password: " + database.Spec.Password)
 	}
 
 	secret := &corev1.Secret{}
@@ -159,6 +165,7 @@ func (reconciler *ApplicationReconciler) SetupWithManager(mgr ctrl.Manager) erro
 		Owns(&appsv1.Deployment{}).
 		Owns(&corev1.Service{}).
 		Owns(&corev1.Secret{}).
+		//Owns(&databasesamplev1alpha1.Database{}). // possible, but not used in this scenario
 		Complete(reconciler)
 }
 
@@ -201,6 +208,24 @@ func (reconciler *ApplicationReconciler) defineSecret(application *applicationsa
 
 	ctrl.SetControllerReference(application, secret, reconciler.Scheme)
 	return secret
+}
+
+func (reconciler *ApplicationReconciler) defineDatabase(application *applicationsamplev1alpha1.Application) *databasesamplev1alpha1.Database {
+	database := &databasesamplev1alpha1.Database{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      application.Spec.DatabaseName,
+			Namespace: application.Spec.DatabaseNamespace,
+		},
+		Spec: databasesamplev1alpha1.DatabaseSpec{
+			User:        databaseUser,
+			Password:    databasePassword,
+			Url:         databaseUrl,
+			Certificate: databaseCertificate,
+		},
+	}
+
+	//ctrl.SetControllerReference(application, database, reconciler.Scheme) // possible, but not used in this scenario
+	return database
 }
 
 func (reconciler *ApplicationReconciler) defineDeployment(application *applicationsamplev1alpha1.Application) *appsv1.Deployment {
