@@ -12,11 +12,15 @@ type ApplicationSpec struct {
 	AmountPods int32 `json:"amountPods"`
 	// +kubebuilder:default:="database"
 	DatabaseName string `json:"databaseName,omitempty"`
-	// +kubebuilder:default:="database"
+	// +kubebuilder:default:="databaseNamespace"
 	DatabaseNamespace string `json:"databaseNamespace,omitempty"`
+	// +kubebuilder:default:="https://raw.githubusercontent.com/IBM/multi-tenancy/main/installapp/postgres-config/create-populate-tenant-a.sql"
+	SchemaUrl string `json:"schemaUrl,omitempty"`
 }
 
 type ApplicationStatus struct {
+	Conditions    []metav1.Condition `json:"conditions"`
+	SchemaCreated bool               `json:"schemaCreated"`
 }
 
 //+kubebuilder:object:root=true

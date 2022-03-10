@@ -48,6 +48,11 @@ const databasePassword string = "password"
 const databaseUrl string = "url"
 const databaseCertificate string = "certificate"
 
+const CONDITION_TYPE_RESOURCE_FOUND = "ResourceFound"
+const CONDITION_STATUS_RESOURCE_FOUND = "True"
+const CONDITION_REASON_RESOURCE_FOUND = "ResourceFound"
+const CONDITION_MESSAGE_RESOURCE_FOUND = "Resource found in k18n"
+
 const finalizer = "database.sample.third.party/finalizer"
 
 var managerConfig *rest.Config
@@ -58,7 +63,7 @@ type ApplicationReconciler struct {
 }
 
 //+kubebuilder:rbac:groups=application.sample.ibm.com,resources=applications,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=application.sample.ibm.com,resources=applications/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=application.sample.ibm.com,resources=applications/status,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=application.sample.ibm.com,resources=applications/finalizers,verbs=update
 func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := log.FromContext(ctx)
@@ -74,6 +79,9 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 		log.Info("Failed to getyApplication resource. Re-running reconcile.")
 		return ctrl.Result{}, err
 	}
+
+	reconciler.appendCondition(ctx, application, CONDITION_TYPE_RESOURCE_FOUND, CONDITION_STATUS_RESOURCE_FOUND,
+		CONDITION_REASON_RESOURCE_FOUND, CONDITION_MESSAGE_RESOURCE_FOUND)
 
 	if reconciler.checkPrerequisites() == false {
 		log.Info("Prerequisites not fulfilled")
@@ -193,14 +201,16 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 		// for simplication purposes secrets are not updated - see deployment section
 	}
 
-	if !controllerutil.ContainsFinalizer(application, finalizer) {
-		controllerutil.AddFinalizer(application, finalizer)
-		err = reconciler.Update(ctx, application)
-		if err != nil {
-			return ctrl.Result{}, err
+	// commented out for dev productivity
+	/*
+		if !controllerutil.ContainsFinalizer(application, finalizer) {
+			controllerutil.AddFinalizer(application, finalizer)
+			err = reconciler.Update(ctx, application)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
 		}
-	}
-
+	*/
 	return ctrl.Result{}, nil
 }
 
@@ -375,4 +385,19 @@ func (reconciler *ApplicationReconciler) finalizeApplication(ctx context.Context
 		}
 	}
 	return fmt.Errorf("Database not deleted yet")
+}
+
+func (reconciler *ApplicationReconciler) appendCondition(ctx context.Context, application *applicationsamplev1alpha1.Application,
+	typeName string, status metav1.ConditionStatus, reason string, message string) error {
+	condition := metav1.Condition{Type: typeName, Status: status, Reason: reason, Message: message}
+	application.Status.Conditions = append(application.Status.Conditions, condition)
+	application.Status.SchemaCreated = true // for debugging only
+	// TODO: update is successful, but status is not updated. access rights issue?
+	err := reconciler.Update(ctx, application)
+	if err != nil {
+		fmt.Println("Application resource update: failure")
+	} else {
+		fmt.Println("Application resource update: success ")
+	}
+	return nil
 }
