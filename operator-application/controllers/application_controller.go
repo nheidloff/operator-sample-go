@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -18,6 +19,7 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	applicationsamplev1alpha1 "github.com/nheidloff/operator-sample-go/operator-application/api/v1alpha1"
@@ -32,19 +34,21 @@ var deploymentName string
 var serviceName string
 var containerName string
 
-var image = "docker.io/nheidloff/simple-microservice:latest"
-var port int32 = 8081
-var nodePort int32 = 30548
-var labelKey = "app"
-var labelValue = "myapplication"
-var greetingMessage = "World"
-var secretGreetingMessageLabel = "GREETING_MESSAGE"
+const image = "docker.io/nheidloff/simple-microservice:latest"
+const port int32 = 8081
+const nodePort int32 = 30548
+const labelKey = "app"
+const labelValue = "myapplication"
+const greetingMessage = "World"
+const secretGreetingMessageLabel = "GREETING_MESSAGE"
 
 // for simplication purposes database properties are hardcoded
-var databaseUser string = "name"
-var databasePassword string = "password"
-var databaseUrl string = "url"
-var databaseCertificate string = "certificate"
+const databaseUser string = "name"
+const databasePassword string = "password"
+const databaseUrl string = "url"
+const databaseCertificate string = "certificate"
+
+const finalizer = "database.sample.third.party/finalizer"
 
 var managerConfig *rest.Config
 
@@ -71,7 +75,7 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 		return ctrl.Result{}, err
 	}
 
-	if checkPrerequisites() == false {
+	if reconciler.checkPrerequisites() == false {
 		log.Info("Prerequisites not fulfilled")
 		return ctrl.Result{}, fmt.Errorf("Prerequisites not fulfilled")
 	}
@@ -84,7 +88,23 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 	fmt.Printf("- DatabaseName: %s\n", application.Spec.DatabaseName)
 	fmt.Printf("- DatabaseNamespace: %s\n", application.Spec.DatabaseNamespace)
 
-	setGlobalVariables(application)
+	reconciler.setGlobalVariables(application)
+
+	isApplicationMarkedToBeDeleted := application.GetDeletionTimestamp() != nil
+	if isApplicationMarkedToBeDeleted {
+		if controllerutil.ContainsFinalizer(application, finalizer) {
+			if err := reconciler.finalizeApplication(ctx, application); err != nil {
+				return ctrl.Result{}, err
+			}
+
+			controllerutil.RemoveFinalizer(application, finalizer)
+			err := reconciler.Update(ctx, application)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+		}
+		return ctrl.Result{}, nil
+	}
 
 	database := &databasesamplev1alpha1.Database{}
 	databaseDefinition := reconciler.defineDatabase(application)
@@ -96,6 +116,8 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 			if err != nil {
 				log.Info("Failed to create database resource. Re-running reconcile.")
 				return ctrl.Result{}, err
+			} else {
+				return ctrl.Result{RequeueAfter: time.Second * 1}, nil // delay the next loop run since database creation can take time
 			}
 		} else {
 			log.Info("Failed to get database resource " + application.Spec.DatabaseName + ". Re-running reconcile.")
@@ -119,7 +141,7 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 			return ctrl.Result{}, err
 		}
 	} else {
-		// for simplication purposes secrets are not updated - see deployment
+		// for simplication purposes secrets are not updated - see deployment section
 	}
 
 	deployment := &appsv1.Deployment{}
@@ -141,8 +163,7 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 		// TODO: use hash of the spec sections to check whether deployed resource needs to be updated
 		// e.g. https://github.com/kubernetes/kubernetes/blob/master/pkg/util/hash/hash.go
 
-		var currentPointer *int32 = deployment.Spec.Replicas
-		var current int32 = *currentPointer
+		var current int32 = *deployment.Spec.Replicas
 		var expected int32 = application.Spec.AmountPods
 		if current != expected {
 			err = reconciler.Update(ctx, deploymentDefinition)
@@ -169,7 +190,15 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 			return ctrl.Result{}, err
 		}
 	} else {
-		// for simplication purposes secrets are not updated - see deployment
+		// for simplication purposes secrets are not updated - see deployment section
+	}
+
+	if !controllerutil.ContainsFinalizer(application, finalizer) {
+		controllerutil.AddFinalizer(application, finalizer)
+		err = reconciler.Update(ctx, application)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	return ctrl.Result{}, nil
@@ -307,7 +336,7 @@ func (reconciler *ApplicationReconciler) defineDeployment(application *applicati
 	return deployment
 }
 
-func checkPrerequisites() bool {
+func (reconciler *ApplicationReconciler) checkPrerequisites() bool {
 	discoveryClient, err := discovery.NewDiscoveryClientForConfig(managerConfig)
 	if err == nil {
 		serverVersion, err := discoveryClient.ServerVersion()
@@ -329,10 +358,21 @@ func checkPrerequisites() bool {
 	return true
 }
 
-func setGlobalVariables(application *applicationsamplev1alpha1.Application) {
+func (reconciler *ApplicationReconciler) setGlobalVariables(application *applicationsamplev1alpha1.Application) {
 	secretName = application.Name + "-secret-greeting"
 	deploymentName = application.Name + "-deployment-microservice"
 	serviceName = application.Name + "-service-microservice"
 	containerName = application.Name + "-microservice"
 	// TODO: handle application.Spec.Version
+}
+
+func (reconciler *ApplicationReconciler) finalizeApplication(ctx context.Context, application *applicationsamplev1alpha1.Application) error {
+	database := &databasesamplev1alpha1.Database{}
+	err := reconciler.Get(ctx, types.NamespacedName{Name: application.Spec.DatabaseName, Namespace: application.Spec.DatabaseNamespace}, database)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return nil
+		}
+	}
+	return fmt.Errorf("Database not deleted yet")
 }
