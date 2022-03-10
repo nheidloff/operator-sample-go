@@ -5,8 +5,11 @@ import (
 )
 
 type ApplicationSpec struct {
+	Version string `json:"version,omitempty"`
 	//+kubebuilder:validation:Minimum=0
-	Size int32 `json:"size"`
+	AmountPods        int32  `json:"amountPods"`
+	DatabaseName      string `json:"databaseName,omitempty"`
+	DatabaseNamespace string `json:"databaseNamespace,omitempty"`
 }
 
 type ApplicationStatus struct {

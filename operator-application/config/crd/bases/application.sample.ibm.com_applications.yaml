@@ -33,12 +33,18 @@ spec:
             type: object
           spec:
             properties:
-              size:
+              amountPods:
                 format: int32
                 minimum: 0
                 type: integer
+              databaseName:
+                type: string
+              databaseNamespace:
+                type: string
+              version:
+                type: string
             required:
-            - size
+            - amountPods
             type: object
           status:
             type: object

@@ -1,6 +1,9 @@
 apiVersion: application.sample.ibm.com/v1alpha1
 kind: Application
 metadata:
-  name: application-sample
+  name: application1
 spec:
-  size: 1
+  version: "1.0.0"
+  amountPods: 1
+  databaseName: database
+  databaseNamespace: database

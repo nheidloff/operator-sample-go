@@ -16,14 +16,9 @@ ibmcloud login -a cloud.ibm.com -r eu-de -g resource-group-niklas-heidloff7 --ss
 
 ibmcloud ks cluster config --cluster xxxxxxx
 
-kubectl create ns test1
-
-kubectl config set-context --current --namespace=test1
+kubectl create ns database
 
 make install run
 
-kubectl apply -f config/samples/cache_v1alpha1_externaldatabase.yaml
-
-
-
-
+kubectl apply -f config/samples/database.sample_v1alpha1_database.yaml -n database 
+kubectl delete -f config/samples/database.sample_v1alpha1_database.yaml -n database 

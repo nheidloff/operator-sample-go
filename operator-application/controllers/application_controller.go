@@ -40,6 +40,11 @@ var labelValue = "myapplication"
 var greetingMessage = "World"
 var secretGreetingMessageLabel = "GREETING_MESSAGE"
 
+var databaseUser string
+var databasePassword string
+var databaseUrl string
+var databaseCertificate string
+
 var managerConfig *rest.Config
 
 type ApplicationReconciler struct {
@@ -70,14 +75,18 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 		return ctrl.Result{}, fmt.Errorf("Prerequisites not fulfilled")
 	}
 
-	fmt.Printf("Name: %s\n", application.Name)
-	fmt.Printf("Namespace: %s\n", application.Namespace)
-	fmt.Printf("Size: %d\n", application.Spec.Size)
+	fmt.Println("Custom Resource Values:")
+	fmt.Printf("- Name: %s\n", application.Name)
+	fmt.Printf("- Namespace: %s\n", application.Namespace)
+	fmt.Printf("- Version: %s\n", application.Spec.Version)
+	fmt.Printf("- AmountPods: %d\n", application.Spec.AmountPods)
+	fmt.Printf("- DatabaseName: %s\n", application.Spec.DatabaseName)
+	fmt.Printf("- DatabaseNamespace: %s\n", application.Spec.DatabaseNamespace)
 
 	setGlobalVariables(application)
 
 	database := &databasesamplev1alpha1.Database{}
-	err = reconciler.Get(ctx, types.NamespacedName{Name: "databadse-sample", Namespace: application.Namespace}, database)
+	err = reconciler.Get(ctx, types.NamespacedName{Name: application.Spec.DatabaseName, Namespace: application.Spec.DatabaseNamespace}, database)
 	if err != nil {
 		fmt.Println("Access Database: Error! err != nil")
 		if errors.IsNotFound(err) {
@@ -195,7 +204,7 @@ func (reconciler *ApplicationReconciler) defineSecret(application *applicationsa
 }
 
 func (reconciler *ApplicationReconciler) defineDeployment(application *applicationsamplev1alpha1.Application) *appsv1.Deployment {
-	replicas := application.Spec.Size
+	replicas := application.Spec.AmountPods
 	labels := map[string]string{labelKey: labelValue}
 
 	deployment := &appsv1.Deployment{
@@ -277,9 +286,10 @@ func checkPrerequisites() bool {
 	return true
 }
 
-func setGlobalVariables(myApplication *applicationsamplev1alpha1.Application) {
-	secretName = myApplication.Name + "-secret-greeting"
-	deploymentName = myApplication.Name + "-deployment-microservice"
-	serviceName = myApplication.Name + "-service-microservice"
-	containerName = "microservice"
+func setGlobalVariables(application *applicationsamplev1alpha1.Application) {
+	secretName = application.Name + "-secret-greeting"
+	deploymentName = application.Name + "-deployment-microservice"
+	serviceName = application.Name + "-service-microservice"
+	containerName = application.Name + "-microservice"
+	// TODO: handle application.Spec.Version
 }
