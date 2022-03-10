@@ -21,6 +21,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	applicationsamplev1alpha1 "github.com/nheidloff/operator-sample-go/operator-application/api/v1alpha1"
+	databasesamplev1alpha1 "github.com/nheidloff/operator-sample-go/operator-database/api/v1alpha1"
 )
 
 var kubernetesServerVersion string
@@ -74,18 +75,19 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 	fmt.Printf("Size: %d\n", application.Spec.Size)
 
 	setGlobalVariables(application)
-	/*
-		externalDatabase := database.GroupName
-		err = reconciler.Get(ctx, types.NamespacedName{Name: "externaldatabase", Namespace: myApplication.Namespace}, externalDatabase)
-		if err != nil {
-			fmt.Println("ungleich nil")
-			if errors.IsNotFound(err) {
-				fmt.Println("nicht gefunden")
-			}
-		} else {
-			fmt.Println("ungleich nil")
+
+	database := &databasesamplev1alpha1.Database{}
+	err = reconciler.Get(ctx, types.NamespacedName{Name: "databadse-sample", Namespace: application.Namespace}, database)
+	if err != nil {
+		fmt.Println("Access Database: Error! err != nil")
+		if errors.IsNotFound(err) {
+			fmt.Println("Access Database: Error! errors.IsNotFound")
 		}
-	*/
+	} else {
+		fmt.Println("Access Database: Success! err == nil")
+		fmt.Println("Access Database: Password: " + database.Spec.Password)
+	}
+
 	secret := &corev1.Secret{}
 	err = reconciler.Get(ctx, types.NamespacedName{Name: secretName, Namespace: application.Namespace}, secret)
 	if err != nil {

@@ -3,6 +3,7 @@ module github.com/nheidloff/operator-sample-go/operator-application
 go 1.17
 
 require (
+	github.com/nheidloff/operator-sample-go/operator-database v0.0.0-20220310110339-73df02eea3ae
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.17.0
 	k8s.io/apimachinery v0.23.0
