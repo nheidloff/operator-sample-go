@@ -4,9 +4,9 @@ Work in progress ...
 
 ## Usage
 
-operator-sdk init --domain nheidloff --repo github.com/nheidloff/operator-database
+operator-sdk init --domain third.party --repo github.com/nheidloff/operator-sample-go/operator-database
 
-operator-sdk create api --group cache --version v1alpha1 --kind ExternalDatabase --resource --controller
+operator-sdk create api --group database.sample --version v1alpha1 --kind Database --resource --controller
 
 make generate
 
@@ -16,12 +16,14 @@ ibmcloud login -a cloud.ibm.com -r eu-de -g resource-group-niklas-heidloff7 --ss
 
 ibmcloud ks cluster config --cluster xxxxxxx
 
+kubectl create ns test1
+
+kubectl config set-context --current --namespace=test1
+
 make install run
 
 kubectl apply -f config/samples/cache_v1alpha1_externaldatabase.yaml
 
-kubectl create ns test1
 
-kubectl config set-context --current --namespace=test1
 
 

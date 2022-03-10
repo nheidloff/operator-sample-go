@@ -1,9 +1,8 @@
----
+# permissions for end users to edit databases.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  creationTimestamp: null
-  name: manager-role
+  name: database-editor-role
 rules:
 - apiGroups:
   - database.sample.third.party
@@ -20,14 +19,6 @@ rules:
 - apiGroups:
   - database.sample.third.party
   resources:
-  - databases/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - database.sample.third.party
-  resources:
   - databases/status
   verbs:
   - get
-  - patch
-  - update

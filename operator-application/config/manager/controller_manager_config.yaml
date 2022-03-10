@@ -8,4 +8,4 @@ webhook:
   port: 9443
 leaderElection:
   leaderElect: true
-  resourceName: ec5146f3.third.party
+  resourceName: 320821e4.ibm.com

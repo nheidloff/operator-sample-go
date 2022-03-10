@@ -1,0 +1,9 @@
+apiVersion: database.sample.third.party/v1alpha1
+kind: Database
+metadata:
+  name: database-sample
+spec:
+  user: name
+  password: password
+  url: url
+  certificate: certificate
