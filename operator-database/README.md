@@ -21,4 +21,5 @@ kubectl create ns database
 make install run
 
 kubectl apply -f config/samples/database.sample_v1alpha1_database.yaml -n database 
+
 kubectl delete -f config/samples/database.sample_v1alpha1_database.yaml -n database 
