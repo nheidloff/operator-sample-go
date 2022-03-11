@@ -1,51 +1,73 @@
-# operator-sample-go: operator
+# operator-application
 
-Work in progress ...
+See below for instructions how to set up and run the application operator as well as the used commands for the development of it.
 
-## Usage
+### Setup and Usage
 
-ibmcloud login -a cloud.ibm.com -r eu-de -g resource-group-niklas-heidloff7 --sso
+The instructions below assume that you use the managed Kubernetes service on the IBM Cloud. You can also use any other Kubernetes service or OpenShift.
 
-ibmcloud ks cluster config --cluster xxxxxxx
+Get the code:
 
-kubectl create ns database
+```
+$ https://github.com/nheidloff/operator-sample-go.git
+$ cd operator-application
+$ code .
+```
 
-kubectl create ns test1
+Login to Kubernetes:
 
-kubectl config set-context --current --namespace=test1
+```
+$ ibmcloud login -a cloud.ibm.com -r eu-de -g resource-group-niklas-heidloff7 --sso
+$ ibmcloud ks cluster config --cluster xxxxxxx
+```
 
-kubectl apply -f ../operator-database/config/crd/bases/database.sample.third.party_databases.yaml
+Configure Kubernetes:
 
-make install run
+```
+$ kubectl create ns test1
+$ kubectl config set-context --current --namespace=test1
+$ kubectl create ns database
+$ kubectl apply -f ../operator-database/config/crd/bases/database.sample.third.party_databases.yaml
+```
 
-kubectl apply -f config/samples/application.sample_v1alpha1_application.yaml
+From a terminal in VSCode run these commands:
 
-ibmcloud ks worker ls --cluster niklas-heidloff-fra02-b3c.4x16
+```
+$ make install run
+$ kubectl apply -f config/samples/application.sample_v1alpha1_application.yaml
+```
 
-http://159.122.86.194:30548/hello
+The sample endpoint can be triggered via '<your-ip>:30548/hello':
 
-kubectl delete -f config/samples/application.sample_v1alpha1_application.yaml
+```
+$ ibmcloud ks worker ls --cluster niklas-heidloff-fra02-b3c.4x16
+$ open http://159.122.86.194:30548/hello
+```
 
-## Manual Setup of the Application Resources only
+All resources can be deleted:
 
-kubectl apply -f kubernetes/secret.yaml
+```
+$ kubectl delete -f config/samples/application.sample_v1alpha1_application.yaml
+```
 
-kubectl apply -f kubernetes/microservice-deployment.yaml 
+### Development Commands
 
-kubectl apply -f kubernetes/microservice-service.yaml
+Manual Setup of the Application Resources only:
 
-kubectl delete -f kubernetes/microservice-service.yaml
+```
+$ kubectl apply -f kubernetes/secret.yaml
+$ kubectl apply -f kubernetes/microservice-deployment.yaml 
+$ kubectl apply -f kubernetes/microservice-service.yaml
+$ kubectl delete -f kubernetes/microservice-service.yaml
+$ kubectl delete -f kubernetes/microservice-deployment.yaml 
+$ kubectl delete -f kubernetes/secret.yaml
+```
 
-kubectl delete -f kubernetes/microservice-deployment.yaml 
+Commands used for the Project Creation:
 
-kubectl delete -f kubernetes/secret.yaml
-
-## Commands used for the Creation
-
-operator-sdk init --domain ibm.com --repo github.com/nheidloff/operator-sample-go/operator-application
-
-operator-sdk create api --group application.sample --version v1alpha1 --kind Application --resource --controller
-
-make generate
-
-make manifests
+```
+$ operator-sdk init --domain ibm.com --repo github.com/nheidloff/operator-sample-go/operator-application
+$ operator-sdk create api --group application.sample --version v1alpha1 --kind Application --resource --controller
+$ make generate
+$ make manifests
+```

@@ -1,19 +1,25 @@
-# operator-sample-go: simple-microservice
+# simple-microservice
 
-Work in progress ...
+The microservice provides a hello world endpoint which prints out an input environment variable. The service has been built with Quarkus.
 
-## Usage
+### Run locally
 
-mvn clean quarkus:dev
+```
+$ https://github.com/nheidloff/operator-sample-go.git
+$ cd simple-microservice
+$ mvn clean quarkus:dev
+$ open http://localhost:8081/hello
+```
 
-http://localhost:8081/hello
+### Run as Container
 
-mvn clean install
-
-podman build -f src/main/docker/Dockerfile.jvm -t nheidloff/simple-microservice .
-
-podman run -i --rm -p 8081:8081 -e GREETING_MESSAGE=World nheidloff/simple-microservice
-
-podman tag localhost/nheidloff/simple-microservice docker.io/nheidloff/simple-microservice
-
-podman push docker.io/nheidloff/simple-microservice
+```
+$ https://github.com/nheidloff/operator-sample-go.git
+$ cd simple-microservice
+$ mvn clean install
+$ podman build -f src/main/docker/Dockerfile.jvm -t nheidloff/simple-microservice .
+$ podman run -i --rm -p 8081:8081 -e GREETING_MESSAGE=World nheidloff/simple-microservice
+$ open http://localhost:8081/hello
+$ podman tag localhost/nheidloff/simple-microservice docker.io/nheidloff/simple-microservice
+$ podman push docker.io/nheidloff/simple-microservice
+```

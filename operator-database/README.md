@@ -1,27 +1,56 @@
-# operator-sample-go: operator
+# operator-database
 
-Work in progress ...
+See below for instructions how to set up and run the database operator as well as the used commands for the development of it.
 
-## Usage
+### Setup and Usage
 
-ibmcloud login -a cloud.ibm.com -r eu-de -g resource-group-niklas-heidloff7 --sso
+The instructions below assume that you use the managed Kubernetes service on the IBM Cloud. You can also use any other Kubernetes service or OpenShift.
 
-ibmcloud ks cluster config --cluster xxxxxxx
+Get the code:
 
-kubectl create ns database
+```
+$ https://github.com/nheidloff/operator-sample-go.git
+$ cd operator-database
+$ code .
+```
 
-make install run
+Login to Kubernetes:
 
-kubectl apply -f config/samples/database.sample_v1alpha1_database.yaml -n database 
+```
+$ ibmcloud login -a cloud.ibm.com -r eu-de -g resource-group-niklas-heidloff7 --sso
+$ ibmcloud ks cluster config --cluster xxxxxxx
+```
 
-kubectl delete -f config/samples/database.sample_v1alpha1_database.yaml -n database 
+Configure Kubernetes:
 
-## Commands used for the Creation
+```
+$ kubectl create ns database
+$ kubectl config set-context --current --namespace=database
+$ kubectl apply -f ../operator-database/config/crd/bases/database.sample.third.party_databases.yaml
+```
 
-operator-sdk init --domain third.party --repo github.com/nheidloff/operator-sample-go/operator-database
+From a terminal in VSCode run these commands:
 
-operator-sdk create api --group database.sample --version v1alpha1 --kind Database --resource --controller
+```
+$ make install run
+$ kubectl apply -f config/samples/database.sample_v1alpha1_database.yaml -n database 
+```
 
-make generate
+You can now see the custom resource in the Kubernetes dashboard or by using kubectl.
 
-make manifests
+All resources can be deleted:
+
+```
+$ kubectl delete -f config/samples/database.sample_v1alpha1_database.yaml -n database
+```
+
+### Development Commands
+
+Commands used for the Project Creation:
+
+```
+$ operator-sdk init --domain third.party --repo github.com/nheidloff/operator-sample-go/operator-database
+$ operator-sdk create api --group database.sample --version v1alpha1 --kind Database --resource --controller
+$ make generate
+$ make manifests
+```

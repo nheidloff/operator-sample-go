@@ -2,15 +2,19 @@
 
 This project contains Kubernetes operator samples that demonstrate best practices how to develop operators with Go and the Operator SDK.
 
-Work in progress ...
+### Setup
 
-See the readmes for draft setup instructions:
+The project contains a custom application controller, a database controller simulating an external resource and a sample microservice. The easiest way to get started is to run the application controller only and refer to the database resource definition and the built microservice image on Docker.io.
 
-* [Application operator](operator-application/README.md)
+Follow these [instructions](operator-application/README.md#setup-and-usage) to run the application controller.
+
+See the readme documents for all components:
+
 * [Database operator](operator-application/README.md)
 * [Microservice](simple-microservice/README.md)
+* [Application operator](operator-application/README.md)
 
-Current Capabilities:
+### Current Capabilities
 
 * Kubernetes version and capabilities
     * Code: [snippet](https://github.com/nheidloff/operator-sample-go/blob/aa9fd15605a54f712e1233423236bd152940f238/operator-application/controllers/application_controller.go#L349)
@@ -27,7 +31,7 @@ Current Capabilities:
 * Setup of watchers
     * Code: [snippet](https://github.com/nheidloff/operator-sample-go/blob/aa9fd15605a54f712e1233423236bd152940f238/operator-application/controllers/application_controller.go#L218)
 
-To be added:
+### Capabilities to be added
 
 * Deployment/bundling
 * Setup of RBAC
@@ -43,7 +47,7 @@ To be added:
 * Leader strategy
 * Creations of database schemas
 
-Go Development Techniques:
+### Go Development Techniques to be documented
 
 * IDE usage and tips
 * Debugging
@@ -51,3 +55,11 @@ Go Development Techniques:
 * Imports and packages
 * Pointers
 * Constants
+
+### Blogs
+
+* [Deleting Resources in Kubernetes Operators](http://heidloff.net/article/deleting-resources-kubernetes-operators/)
+* Accessing third Party Custom Resources in Go Operators
+* [Finding out the Kubernetes Version in Operators](http://heidloff.net/article/finding-kubernetes-version-capabilities-operators/)
+* [Creating Database Schemas in Kubernetes Operators](http://heidloff.net/article/creating-database-schemas-kubernetes-operators/)
+* [Resources to build Kubernetes Operators](http://heidloff.net/articles/resources-to-build-kubernetes-operators/)
