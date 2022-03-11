@@ -6,9 +6,9 @@ Work in progress ...
 
 See the readmes for draft setup instructions:
 
-* [Application operator](operator-application/ReadMe.md)
-* [Database operator](operator-application/ReadMe.md)
-* [Microservice](simple-microservice/ReadMe.md)
+* [Application operator](operator-application/README.md)
+* [Database operator](operator-application/README.md)
+* [Microservice](simple-microservice/README.md)
 
 Current Capabilities:
 
@@ -29,15 +29,19 @@ Current Capabilities:
 
 To be added:
 
-* Versioning
-* Change checks via hash
-* Creations of database schemas
+* Deployment/bundling
 * Setup of RBAC
-* Metrics
-* Scope: namespace vs global
 * Life cycle manager
-* Phase 3 - 5
+* Versioning
 * Webhooks
+* Change checks via hash
+* Metrics
+* Creation of database schemas
+* Scope: namespace vs global
+* Phase 3 - 5
+* Testing
+* Leader strategy
+* Creations of database schemas
 
 Go Development Techniques:
 
