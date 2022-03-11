@@ -2,8 +2,13 @@ package controllers
 
 import (
 	"context"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"hash"
 	"time"
+
+	"golang.org/x/crypto/ripemd160"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -168,8 +173,10 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 			return ctrl.Result{}, err
 		}
 	} else {
-		// TODO: use hash of the spec sections to check whether deployed resource needs to be updated
-		// e.g. https://github.com/kubernetes/kubernetes/blob/master/pkg/util/hash/hash.go
+		specHashActual := reconciler.getHashForSpec(&application.Spec)
+		fmt.Println("Hash when amountPods=" + fmt.Sprint(application.Spec.AmountPods) + " : " + specHashActual)
+
+		// TODO: compare actual with expected and only invoke the next one when different
 
 		var current int32 = *deployment.Spec.Replicas
 		var expected int32 = application.Spec.AmountPods
@@ -413,4 +420,13 @@ func (reconciler *ApplicationReconciler) containsCondition(ctx context.Context,
 		}
 	}
 	return output
+}
+
+func (reconciler *ApplicationReconciler) getHashForSpec(specStruct interface{}) string {
+	byteArray, _ := json.Marshal(specStruct)
+	var hasher hash.Hash
+	hasher = ripemd160.New()
+	hasher.Reset()
+	hasher.Write(byteArray)
+	return hex.EncodeToString(hasher.Sum(nil))
 }
