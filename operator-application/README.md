@@ -29,6 +29,8 @@ ibmcloud ks worker ls --cluster niklas-heidloff-fra02-b3c.4x16
 
 http://159.122.86.194:30548/hello
 
+**Manual Setup**
+
 kubectl apply -f kubernetes/secret.yaml
 kubectl apply -f kubernetes/microservice-deployment.yaml 
 kubectl apply -f kubernetes/microservice-service.yaml
