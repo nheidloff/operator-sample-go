@@ -53,13 +53,7 @@ const databasePassword string = "password"
 const databaseUrl string = "url"
 const databaseCertificate string = "certificate"
 
-const CONDITION_TYPE_RESOURCE_FOUND = "ResourceFound"
-const CONDITION_STATUS_RESOURCE_FOUND = "True"
-const CONDITION_REASON_RESOURCE_FOUND = "ResourceFound"
-const CONDITION_MESSAGE_RESOURCE_FOUND = "Resource found in k18n"
-
 const finalizer = "database.sample.third.party/finalizer"
-
 const hashLabelName = "application.sample.ibm.com/hash"
 
 var managerConfig *rest.Config
@@ -86,13 +80,22 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 		log.Info("Failed to getyApplication resource. Re-running reconcile.")
 		return ctrl.Result{}, err
 	}
-
-	reconciler.appendCondition(ctx, application, CONDITION_TYPE_RESOURCE_FOUND, CONDITION_STATUS_RESOURCE_FOUND,
-		CONDITION_REASON_RESOURCE_FOUND, CONDITION_MESSAGE_RESOURCE_FOUND)
+	err = reconciler.setConditionResourceFound(ctx, application)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
 
 	if reconciler.checkPrerequisites() == false {
 		log.Info("Prerequisites not fulfilled")
-		return ctrl.Result{}, fmt.Errorf("Prerequisites not fulfilled")
+		err = reconciler.setConditionFailed(ctx, application, CONDITION_REASON_FAILED_INSTALL_READY)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{RequeueAfter: time.Second * 60}, fmt.Errorf("Prerequisites not fulfilled")
+	}
+	err = reconciler.setConditionInstallReady(ctx, application)
+	if err != nil {
+		return ctrl.Result{}, err
 	}
 
 	fmt.Println("Custom Resource Values:")
@@ -127,6 +130,10 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 	if err != nil {
 		if errors.IsNotFound(err) {
 			log.Info("Database resource " + application.Spec.DatabaseName + " not found. Creating or re-creating database")
+			err = reconciler.setConditionDatabaseExists(ctx, application, CONDITION_STATUS_FALSE)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
 			err = reconciler.Create(ctx, databaseDefinition)
 			if err != nil {
 				log.Info("Failed to create database resource. Re-running reconcile.")
@@ -138,6 +145,15 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 			log.Info("Failed to get database resource " + application.Spec.DatabaseName + ". Re-running reconcile.")
 			return ctrl.Result{}, err
 		}
+	}
+
+	// TODO: Create schema
+	// see https://github.com/IBM/multi-tenancy/blob/a181c562b788f7b5fad99e09b441f93e4489b72f/operator/ecommerceapplication/postgresHelper/postgresHelper.go
+
+	// TODO: Check if database and schema exist
+	err = reconciler.setConditionDatabaseExists(ctx, application, CONDITION_STATUS_TRUE)
+	if err != nil {
+		return ctrl.Result{}, err
 	}
 
 	secret := &corev1.Secret{}
@@ -178,9 +194,6 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 		specHashTarget := reconciler.getHashForSpec(&deploymentDefinition.Spec)
 		specHashActual := reconciler.getHashFromLabels(deployment.Labels)
 		if specHashActual != specHashTarget {
-			log.Info("Updating deployment resource " + deploymentName)
-			log.Info("Current deployment hash=" + specHashActual)
-			log.Info("Target deployment hash=" + specHashTarget)
 			var current int32 = *deployment.Spec.Replicas
 			var expected int32 = *deploymentDefinition.Spec.Replicas
 			if current != expected {
@@ -224,6 +237,11 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 			}
 		}
 	*/
+	err = reconciler.setConditionSucceeded(ctx, application)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
 	return ctrl.Result{}, nil
 }
 
@@ -404,18 +422,156 @@ func (reconciler *ApplicationReconciler) finalizeApplication(ctx context.Context
 	return fmt.Errorf("Database not deleted yet")
 }
 
+const CONDITION_STATUS_TRUE = "True"
+const CONDITION_STATUS_FALSE = "False"
+const CONDITION_STATUS_UNKNOWN = "Unknown"
+
+// status of RESOURCE_FOUND can only be True, otherwise there is no condition
+const CONDITION_TYPE_RESOURCE_FOUND = "ResourceFound"
+const CONDITION_REASON_RESOURCE_FOUND = "ResourceFound"
+const CONDITION_MESSAGE_RESOURCE_FOUND = "Resource found in k18n"
+
+func (reconciler *ApplicationReconciler) setConditionResourceFound(ctx context.Context,
+	application *applicationsamplev1alpha1.Application) error {
+
+	if !reconciler.containsCondition(ctx, application, CONDITION_REASON_RESOURCE_FOUND) {
+		return reconciler.appendCondition(ctx, application, CONDITION_TYPE_RESOURCE_FOUND, CONDITION_STATUS_TRUE,
+			CONDITION_REASON_RESOURCE_FOUND, CONDITION_MESSAGE_RESOURCE_FOUND)
+	}
+	return nil
+}
+
+// status of INSTALL_READY can only be True, otherwise there is a failure condition
+const CONDITION_TYPE_INSTALL_READY = "InstallReady"
+const CONDITION_REASON_INSTALL_READY = "AllRequirementsMet"
+const CONDITION_MESSAGE_INSTALL_READY = "All requirements met, attempting install"
+
+func (reconciler *ApplicationReconciler) setConditionInstallReady(ctx context.Context,
+	application *applicationsamplev1alpha1.Application) error {
+
+	reconciler.deleteCondition(ctx, application, CONDITION_TYPE_FAILED, CONDITION_REASON_FAILED_INSTALL_READY)
+	if !reconciler.containsCondition(ctx, application, CONDITION_REASON_INSTALL_READY) {
+		return reconciler.appendCondition(ctx, application, CONDITION_TYPE_INSTALL_READY, CONDITION_STATUS_TRUE,
+			CONDITION_REASON_INSTALL_READY, CONDITION_MESSAGE_INSTALL_READY)
+	}
+	return nil
+}
+
+// status of FAILED can only be True
+const CONDITION_TYPE_FAILED = "Failed"
+const CONDITION_REASON_FAILED_INSTALL_READY = "RequirementsNotMet"
+const CONDITION_MESSAGE_FAILED_INSTALL_READY = "Not all requirements met"
+
+func (reconciler *ApplicationReconciler) setConditionFailed(ctx context.Context,
+	application *applicationsamplev1alpha1.Application, reason string) error {
+
+	var message string
+	switch reason {
+	case CONDITION_REASON_FAILED_INSTALL_READY:
+		message = CONDITION_MESSAGE_FAILED_INSTALL_READY
+	}
+
+	if !reconciler.containsCondition(ctx, application, reason) {
+		return reconciler.appendCondition(ctx, application, CONDITION_TYPE_FAILED, CONDITION_STATUS_TRUE,
+			reason, message)
+	}
+	return nil
+}
+
+// status of DATABASE_EXISTS can be True or False
+const CONDITION_TYPE_DATABASE_EXISTS = "DatabaseExists"
+const CONDITION_REASON_DATABASE_EXISTS = "DatabaseExists"
+const CONDITION_MESSAGE_DATABASE_EXISTS = "The database exists"
+
+func (reconciler *ApplicationReconciler) setConditionDatabaseExists(ctx context.Context,
+	application *applicationsamplev1alpha1.Application, status metav1.ConditionStatus) error {
+
+	if !reconciler.containsCondition(ctx, application, CONDITION_REASON_DATABASE_EXISTS) {
+		return reconciler.appendCondition(ctx, application, CONDITION_TYPE_DATABASE_EXISTS, status,
+			CONDITION_REASON_DATABASE_EXISTS, CONDITION_MESSAGE_DATABASE_EXISTS)
+	} else {
+		currentStatus := reconciler.getConditionStatus(ctx, application, CONDITION_TYPE_DATABASE_EXISTS)
+		if currentStatus != status {
+			reconciler.deleteCondition(ctx, application, CONDITION_TYPE_DATABASE_EXISTS, CONDITION_REASON_DATABASE_EXISTS)
+			return reconciler.appendCondition(ctx, application, CONDITION_TYPE_DATABASE_EXISTS, status,
+				CONDITION_REASON_DATABASE_EXISTS, CONDITION_MESSAGE_DATABASE_EXISTS)
+		}
+	}
+	return nil
+}
+
+// status of SUCCEEDED can only be True
+const CONDITION_TYPE_SUCCEEDED = "Succeeded"
+const CONDITION_REASON_SUCCEEDED = "InstallSucceeded"
+const CONDITION_MESSAGE_SUCCEEDED = "Application has been installed"
+
+func (reconciler *ApplicationReconciler) setConditionSucceeded(ctx context.Context,
+	application *applicationsamplev1alpha1.Application) error {
+
+	if !reconciler.containsCondition(ctx, application, CONDITION_REASON_SUCCEEDED) {
+		return reconciler.appendCondition(ctx, application, CONDITION_TYPE_SUCCEEDED, CONDITION_STATUS_TRUE,
+			CONDITION_REASON_SUCCEEDED, CONDITION_MESSAGE_SUCCEEDED)
+	}
+	return nil
+}
+
+// status of DELETION_REQUEST_RECEIVED can only be True
+const CONDITION_TYPE_DELETION_REQUEST_RECEIVED = "DeletionRequestReceived"
+const CONDITION_REASON_DELETION_REQUEST_RECEIVED = "DeletionRequestReceived"
+const CONDITION_MESSAGE_DELETION_REQUEST_RECEIVED = "Application is supposed to be deleted"
+
+func (reconciler *ApplicationReconciler) setConditionDeletionRequestReceived(ctx context.Context,
+	application *applicationsamplev1alpha1.Application) error {
+
+	if !reconciler.containsCondition(ctx, application, CONDITION_REASON_DELETION_REQUEST_RECEIVED) {
+		return reconciler.appendCondition(ctx, application, CONDITION_TYPE_DELETION_REQUEST_RECEIVED, CONDITION_STATUS_TRUE,
+			CONDITION_REASON_DELETION_REQUEST_RECEIVED, CONDITION_MESSAGE_DELETION_REQUEST_RECEIVED)
+	}
+	return nil
+}
+
+func (reconciler *ApplicationReconciler) getConditionStatus(ctx context.Context, application *applicationsamplev1alpha1.Application,
+	typeName string) metav1.ConditionStatus {
+
+	var output metav1.ConditionStatus = CONDITION_STATUS_UNKNOWN
+	for _, condition := range application.Status.Conditions {
+		if condition.Type == typeName {
+			output = condition.Status
+		}
+	}
+	return output
+}
+
+func (reconciler *ApplicationReconciler) deleteCondition(ctx context.Context, application *applicationsamplev1alpha1.Application,
+	typeName string, reason string) error {
+
+	log := log.FromContext(ctx)
+	var newConditions = make([]metav1.Condition, 0)
+	for _, condition := range application.Status.Conditions {
+		if condition.Type != typeName && condition.Reason != reason {
+			newConditions = append(newConditions, condition)
+		}
+	}
+	application.Status.Conditions = newConditions
+
+	err := reconciler.Client.Status().Update(ctx, application)
+	if err != nil {
+		log.Info("Application resource status update failed.")
+	}
+	return nil
+}
+
 func (reconciler *ApplicationReconciler) appendCondition(ctx context.Context, application *applicationsamplev1alpha1.Application,
 	typeName string, status metav1.ConditionStatus, reason string, message string) error {
 
-	if !reconciler.containsCondition(ctx, application, reason) {
-		time := metav1.Time{Time: time.Now()}
-		condition := metav1.Condition{Type: typeName, Status: status, Reason: reason, Message: message, LastTransitionTime: time}
-		application.Status.Conditions = append(application.Status.Conditions, condition)
+	log := log.FromContext(ctx)
+	time := metav1.Time{Time: time.Now()}
+	condition := metav1.Condition{Type: typeName, Status: status, Reason: reason, Message: message, LastTransitionTime: time}
+	application.Status.Conditions = append(application.Status.Conditions, condition)
 
-		err := reconciler.Client.Status().Update(ctx, application)
-		if err != nil {
-			fmt.Println("Application resource status update failed")
-		}
+	err := reconciler.Client.Status().Update(ctx, application)
+	if err != nil {
+		log.Info("Application resource status update failed.")
 	}
 	return nil
 }
@@ -442,13 +598,10 @@ func (reconciler *ApplicationReconciler) getHashForSpec(specStruct interface{}) 
 }
 
 func (reconciler *ApplicationReconciler) setHashToLabels(labels map[string]string, specHashActual string) map[string]string {
-
 	if labels == nil {
 		labels = map[string]string{}
 	}
-
 	labels[hashLabelName] = specHashActual
-
 	return labels
 }
 
