@@ -60,6 +60,8 @@ const CONDITION_MESSAGE_RESOURCE_FOUND = "Resource found in k18n"
 
 const finalizer = "database.sample.third.party/finalizer"
 
+const hashLabelName = "nheidloff.operator.sample.go.hash"
+
 var managerConfig *rest.Config
 
 type ApplicationReconciler struct {
@@ -173,18 +175,22 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 			return ctrl.Result{}, err
 		}
 	} else {
-		specHashActual := reconciler.getHashForSpec(&application.Spec)
-		fmt.Println("Hash when amountPods=" + fmt.Sprint(application.Spec.AmountPods) + " : " + specHashActual)
-
-		// TODO: compare actual with expected and only invoke the next one when different
-
-		var current int32 = *deployment.Spec.Replicas
-		var expected int32 = application.Spec.AmountPods
-		if current != expected {
-			err = reconciler.Update(ctx, deploymentDefinition)
-			if err != nil {
-				log.Info("Failed to update deployment resource. Re-running reconcile.")
-				return ctrl.Result{}, err
+		specHashTarget := reconciler.getHashForSpec(&deploymentDefinition.Spec)
+		specHashActual := reconciler.getHashFromLabels(deployment.Labels)
+		if specHashActual != specHashTarget {
+			log.Info("Updating deployment resource " + deploymentName)
+			log.Info("Current deployment hash=" + specHashActual)
+			log.Info("Target deployment hash=" + specHashTarget)
+			var current int32 = *deployment.Spec.Replicas
+			var expected int32 = *deploymentDefinition.Spec.Replicas
+			if current != expected {
+				deployment.Spec.Replicas = &expected
+				deployment.Labels = reconciler.setHashToLabels(deployment.Labels, specHashTarget)
+				err = reconciler.Update(ctx, deployment)
+				if err != nil {
+					log.Info("Failed to update deployment resource. Re-running reconcile.")
+					return ctrl.Result{}, err
+				}
 			}
 		}
 	}
@@ -349,6 +355,10 @@ func (reconciler *ApplicationReconciler) defineDeployment(application *applicati
 			},
 		},
 	}
+
+	specHashActual := reconciler.getHashForSpec(&deployment.Spec)
+	deployment.Labels = reconciler.setHashToLabels(nil, specHashActual)
+
 	ctrl.SetControllerReference(application, deployment, reconciler.Scheme)
 	return deployment
 }
@@ -430,3 +440,24 @@ func (reconciler *ApplicationReconciler) getHashForSpec(specStruct interface{}) 
 	hasher.Write(byteArray)
 	return hex.EncodeToString(hasher.Sum(nil))
 }
+
+func (reconciler *ApplicationReconciler) setHashToLabels(labels map[string]string, specHashActual string) map[string]string {
+
+	if labels == nil {
+		labels = map[string]string{}
+	}
+
+	labels[hashLabelName] = specHashActual
+
+	return labels
+}
+
+func (reconciler *ApplicationReconciler) getHashFromLabels(labels map[string]string) string {
+	return labels[hashLabelName]
+}
+
+/*func (reconciler *ApplicationReconciler) copyDeploymentWithNewHash(d appsv1.Deployment, hash string) appsv1.Deployment {
+	dCopy := *d.DeepCopy()
+	dCopy.Labels = reconciler.setHashToLabels(dCopy.Labels, hash)
+	return dCopy
+}*/
