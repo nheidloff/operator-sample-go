@@ -455,9 +455,3 @@ func (reconciler *ApplicationReconciler) setHashToLabels(labels map[string]strin
 func (reconciler *ApplicationReconciler) getHashFromLabels(labels map[string]string) string {
 	return labels[hashLabelName]
 }
-
-/*func (reconciler *ApplicationReconciler) copyDeploymentWithNewHash(d appsv1.Deployment, hash string) appsv1.Deployment {
-	dCopy := *d.DeepCopy()
-	dCopy.Labels = reconciler.setHashToLabels(dCopy.Labels, hash)
-	return dCopy
-}*/
