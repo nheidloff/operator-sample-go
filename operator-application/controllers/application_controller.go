@@ -60,7 +60,7 @@ const CONDITION_MESSAGE_RESOURCE_FOUND = "Resource found in k18n"
 
 const finalizer = "database.sample.third.party/finalizer"
 
-const hashLabelName = "nheidloff.operator.sample.go.hash"
+const hashLabelName = "application.sample.ibm.com/hash"
 
 var managerConfig *rest.Config
 

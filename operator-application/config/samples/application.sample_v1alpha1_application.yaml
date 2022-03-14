@@ -6,4 +6,4 @@ spec:
   version: "1.0.0"
   amountPods: 1
   databaseName: database
-  databaseNamespace: deleeuw-operator-database
+  databaseNamespace: database
