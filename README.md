@@ -16,30 +16,18 @@ See the readme documents for all components:
 
 ### Documentation
 
-* [Updating Resources from Kubernetes Operators](http://heidloff.net/article/updating-resources-kubernetes-operators/)
+* [Creating and updating Resources from Kubernetes Operators](http://heidloff.net/article/updating-resources-kubernetes-operators/)
 * [Deleting Resources in Kubernetes Operators](http://heidloff.net/article/deleting-resources-kubernetes-operators/)
 * [Storing State of Kubernetes Resources with Conditions](http://heidloff.net/article/storing-state-status-kubernetes-resources-conditions-operators-go/)
 * [Accessing third Party Custom Resources in Go Operators](http://heidloff.net/article/accessing-third-party-custom-resources-go-operators/)
-* [Finding out the Kubernetes Version in Operators](http://heidloff.net/article/finding-kubernetes-version-capabilities-operators/)
+* [Finding out the Kubernetes Versions and Capabilities in Operators](http://heidloff.net/article/finding-kubernetes-version-capabilities-operators/)
 
-### Current Capabilities
+### Undocumented Capabilities
 
-* Kubernetes version and capabilities
-    * Code: [snippet](https://github.com/nheidloff/operator-sample-go/blob/aa9fd15605a54f712e1233423236bd152940f238/operator-application/controllers/application_controller.go#L349)
-* Status updates and conditions
-    * Code: [snippet](https://github.com/nheidloff/operator-sample-go/blob/ca5a50763cf36d4d74786119573a4e4865d4a942/operator-application/controllers/application_controller.go#L564), [snippet](https://github.com/nheidloff/operator-sample-go/blob/ca5a50763cf36d4d74786119573a4e4865d4a942/operator-application/controllers/application_controller.go#L503), [snippet](https://github.com/nheidloff/operator-sample-go/blob/ca5a50763cf36d4d74786119573a4e4865d4a942/operator-application/controllers/application_controller.go#L240)
-* Deletions via child first strategy
-    * Code: [snippet](https://github.com/nheidloff/operator-sample-go/blob/aa9fd15605a54f712e1233423236bd152940f238/operator-application/controllers/application_controller.go#L266)
-* Deletions via programmatic strategy, for example for external resources
-    * Code: [snippet](https://github.com/nheidloff/operator-sample-go/blob/aa9fd15605a54f712e1233423236bd152940f238/operator-application/controllers/application_controller.go#L101), [snippet](https://github.com/nheidloff/operator-sample-go/blob/aa9fd15605a54f712e1233423236bd152940f238/operator-application/controllers/application_controller.go#L379), [snippet](https://github.com/nheidloff/operator-sample-go/blob/aa9fd15605a54f712e1233423236bd152940f238/operator-application/controllers/application_controller.go#L206)
-* Accessing third party custom resources
-    * Code: [snippet](https://github.com/nheidloff/operator-sample-go/blob/aa9fd15605a54f712e1233423236bd152940f238/operator-application/controllers/application_controller.go#L26), [snippet](https://github.com/nheidloff/operator-sample-go/blob/aa9fd15605a54f712e1233423236bd152940f238/operator-application/controllers/application_controller.go#L117), [snippet](https://github.com/nheidloff/operator-sample-go/blob/aa9fd15605a54f712e1233423236bd152940f238/operator-application/controllers/application_controller.go#L270), [snippet](https://github.com/nheidloff/operator-sample-go/blob/aa9fd15605a54f712e1233423236bd152940f238/operator-application/main.go#L31)
-* Updates of deployed resources
-    * Code: [snippet](https://github.com/nheidloff/operator-sample-go/blob/ca5a50763cf36d4d74786119573a4e4865d4a942/operator-application/controllers/application_controller.go#L194), [snippet](https://github.com/nheidloff/operator-sample-go/blob/ca5a50763cf36d4d74786119573a4e4865d4a942/operator-application/controllers/application_controller.go#L591)
 * Setup of watchers
     * Code: [snippet](https://github.com/nheidloff/operator-sample-go/blob/aa9fd15605a54f712e1233423236bd152940f238/operator-application/controllers/application_controller.go#L218)
 
-### Capabilities to be added
+### Capabilities To Be Added
 
 * Deployment/bundling
 * Setup of RBAC
@@ -53,9 +41,9 @@ See the readme documents for all components:
 * Leader strategy
 * Creations of database schemas
 * Templates for customizability
-* Stateful resources (via uuid, resourceVersion and in-memory store)
+* Stateful resources (via uid, resourceVersion and in-memory store)
 
-### Go Development Techniques to be documented
+### Go Development Techniques To Be Documented
 
 * IDE usage and tips
 * Debugging
@@ -70,4 +58,5 @@ See the readme documents for all components:
 * [Intro to the Operator Lifecycle Manager](https://www.youtube.com/watch?v=5PorcMTYZTo)
 * [Go Modules](https://www.youtube.com/watch?v=Z1VhG7cf83M)
 * [Resources to build Kubernetes Operators](http://heidloff.net/articles/resources-to-build-kubernetes-operators/)
+* [Kubernetes API Conventions](https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md)
 * [Quarkus sample](https://github.com/nheidloff/quarkus-operator-microservice-database)
