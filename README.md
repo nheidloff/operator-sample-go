@@ -64,4 +64,4 @@ See the readme documents for all components:
 * [Creating Database Schemas in Kubernetes Operators](http://heidloff.net/article/creating-database-schemas-kubernetes-operators/)
 * [Resources to build Kubernetes Operators](http://heidloff.net/articles/resources-to-build-kubernetes-operators/)
 * [Updating Resources from Kubernetes Operators](http://heidloff.net/article/updating-resources-kubernetes-operators/)
-* Storing State of Kubernetes Resources with Conditions
+* [Storing State of Kubernetes Resources with Conditions](http://heidloff.net/article/storing-state-status-kubernetes-resources-conditions-operators-go/)
