@@ -2,13 +2,8 @@ package controllers
 
 import (
 	"context"
-	"encoding/hex"
-	"encoding/json"
 	"fmt"
-	"hash"
 	"time"
-
-	"golang.org/x/crypto/ripemd160"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -28,33 +23,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	applicationsamplev1alpha1 "github.com/nheidloff/operator-sample-go/operator-application/api/v1alpha1"
+	"github.com/nheidloff/operator-sample-go/operator-application/utilities"
 	databasesamplev1alpha1 "github.com/nheidloff/operator-sample-go/operator-database/api/v1alpha1"
 )
 
 var kubernetesServerVersion string
 var runsOnOpenShift bool = false
 
-var secretName string
-var deploymentName string
-var serviceName string
-var containerName string
-
-const image = "docker.io/nheidloff/simple-microservice:latest"
-const port int32 = 8081
-const nodePort int32 = 30548
-const labelKey = "app"
-const labelValue = "myapplication"
-const greetingMessage = "World"
-const secretGreetingMessageLabel = "GREETING_MESSAGE"
-
-// for simplication purposes database properties are hardcoded
-const databaseUser string = "name"
-const databasePassword string = "password"
-const databaseUrl string = "url"
-const databaseCertificate string = "certificate"
-
 const finalizer = "database.sample.third.party/finalizer"
-const hashLabelName = "application.sample.ibm.com/hash"
 
 var managerConfig *rest.Config
 
@@ -134,12 +110,14 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 			if err != nil {
 				return ctrl.Result{}, err
 			}
+			// Note: Creating external resources from controllers is not always recommended for encapsulation and security reasons
 			err = reconciler.Create(ctx, databaseDefinition)
 			if err != nil {
 				log.Info("Failed to create database resource. Re-running reconcile.")
 				return ctrl.Result{}, err
 			} else {
-				return ctrl.Result{RequeueAfter: time.Second * 1}, nil // delay the next loop run since database creation can take time
+				// Note: Delay the next loop run since database creation can take time
+				return ctrl.Result{RequeueAfter: time.Second * 1}, nil
 			}
 		} else {
 			log.Info("Failed to get database resource " + application.Spec.DatabaseName + ". Re-running reconcile.")
@@ -147,10 +125,10 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 		}
 	}
 
-	// TODO: Create schema
+	// TODO: Create schema and sample data and check if data from the database can be accessed
 	// see https://github.com/IBM/multi-tenancy/blob/a181c562b788f7b5fad99e09b441f93e4489b72f/operator/ecommerceapplication/postgresHelper/postgresHelper.go
+	// see http://heidloff.net/article/creating-database-schemas-kubernetes-operators/
 
-	// TODO: Check if database and schema exist
 	err = reconciler.setConditionDatabaseExists(ctx, application, CONDITION_STATUS_TRUE)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -172,7 +150,7 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 			return ctrl.Result{}, err
 		}
 	} else {
-		// for simplication purposes secrets are not updated - see deployment section
+		// Note: For simplication purposes secrets are not updated - see deployment section
 	}
 
 	deployment := &appsv1.Deployment{}
@@ -191,14 +169,15 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 			return ctrl.Result{}, err
 		}
 	} else {
-		specHashTarget := reconciler.getHashForSpec(&deploymentDefinition.Spec)
-		specHashActual := reconciler.getHashFromLabels(deployment.Labels)
+		specHashTarget := utilities.GetHashForSpec(&deploymentDefinition.Spec)
+		specHashActual := utilities.GetHashFromLabels(deployment.Labels)
+		// Note: When using the hash, the controller will not revert manual changes of the amount of replicas in the deployment
 		if specHashActual != specHashTarget {
 			var current int32 = *deployment.Spec.Replicas
 			var expected int32 = *deploymentDefinition.Spec.Replicas
 			if current != expected {
 				deployment.Spec.Replicas = &expected
-				deployment.Labels = reconciler.setHashToLabels(deployment.Labels, specHashTarget)
+				deployment.Labels = utilities.SetHashToLabels(deployment.Labels, specHashTarget)
 				err = reconciler.Update(ctx, deployment)
 				if err != nil {
 					log.Info("Failed to update deployment resource. Re-running reconcile.")
@@ -224,10 +203,10 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 			return ctrl.Result{}, err
 		}
 	} else {
-		// for simplication purposes secrets are not updated - see deployment section
+		// Note: For simplication purposes secrets are not updated - see deployment section
 	}
 
-	// commented out for dev productivity
+	// Note: Commented out for dev productivity only
 	/*
 		if !controllerutil.ContainsFinalizer(application, finalizer) {
 			controllerutil.AddFinalizer(application, finalizer)
@@ -253,7 +232,8 @@ func (reconciler *ApplicationReconciler) SetupWithManager(mgr ctrl.Manager) erro
 		Owns(&appsv1.Deployment{}).
 		Owns(&corev1.Service{}).
 		Owns(&corev1.Secret{}).
-		//Owns(&databasesamplev1alpha1.Database{}). // possible, but not used in this scenario
+		// Note: Possible, but not used in this scenario
+		//Owns(&databasesamplev1alpha1.Database{}).
 		Complete(reconciler)
 }
 
@@ -312,7 +292,8 @@ func (reconciler *ApplicationReconciler) defineDatabase(application *application
 		},
 	}
 
-	//ctrl.SetControllerReference(application, database, reconciler.Scheme) // possible, but not used in this scenario
+	// Note: Possible, but not used in this scenario
+	//ctrl.SetControllerReference(application, database, reconciler.Scheme)
 	return database
 }
 
@@ -374,8 +355,8 @@ func (reconciler *ApplicationReconciler) defineDeployment(application *applicati
 		},
 	}
 
-	specHashActual := reconciler.getHashForSpec(&deployment.Spec)
-	deployment.Labels = reconciler.setHashToLabels(nil, specHashActual)
+	specHashActual := utilities.GetHashForSpec(&deployment.Spec)
+	deployment.Labels = utilities.SetHashToLabels(nil, specHashActual)
 
 	ctrl.SetControllerReference(application, deployment, reconciler.Scheme)
 	return deployment
@@ -399,7 +380,9 @@ func (reconciler *ApplicationReconciler) checkPrerequisites() bool {
 			}
 		}
 	}
-	// TODO: check correct Kubernetes version and distro
+	// TODO: Check correct Kubernetes version and distro
+
+	// Note: This function could also check whether external resources exist if the external resource is not created/owned by this controller
 	return true
 }
 
@@ -408,7 +391,7 @@ func (reconciler *ApplicationReconciler) setGlobalVariables(application *applica
 	deploymentName = application.Name + "-deployment-microservice"
 	serviceName = application.Name + "-service-microservice"
 	containerName = application.Name + "-microservice"
-	// TODO: handle application.Spec.Version
+	// TODO: Handle application.Spec.Version
 }
 
 func (reconciler *ApplicationReconciler) finalizeApplication(ctx context.Context, application *applicationsamplev1alpha1.Application) error {
@@ -426,7 +409,7 @@ const CONDITION_STATUS_TRUE = "True"
 const CONDITION_STATUS_FALSE = "False"
 const CONDITION_STATUS_UNKNOWN = "Unknown"
 
-// status of RESOURCE_FOUND can only be True, otherwise there is no condition
+// Note: Status of RESOURCE_FOUND can only be True, otherwise there is no condition
 const CONDITION_TYPE_RESOURCE_FOUND = "ResourceFound"
 const CONDITION_REASON_RESOURCE_FOUND = "ResourceFound"
 const CONDITION_MESSAGE_RESOURCE_FOUND = "Resource found in k18n"
@@ -441,7 +424,7 @@ func (reconciler *ApplicationReconciler) setConditionResourceFound(ctx context.C
 	return nil
 }
 
-// status of INSTALL_READY can only be True, otherwise there is a failure condition
+// Note: Status of INSTALL_READY can only be True, otherwise there is a failure condition
 const CONDITION_TYPE_INSTALL_READY = "InstallReady"
 const CONDITION_REASON_INSTALL_READY = "AllRequirementsMet"
 const CONDITION_MESSAGE_INSTALL_READY = "All requirements met, attempting install"
@@ -457,7 +440,7 @@ func (reconciler *ApplicationReconciler) setConditionInstallReady(ctx context.Co
 	return nil
 }
 
-// status of FAILED can only be True
+// Note: Status of FAILED can only be True
 const CONDITION_TYPE_FAILED = "Failed"
 const CONDITION_REASON_FAILED_INSTALL_READY = "RequirementsNotMet"
 const CONDITION_MESSAGE_FAILED_INSTALL_READY = "Not all requirements met"
@@ -478,7 +461,7 @@ func (reconciler *ApplicationReconciler) setConditionFailed(ctx context.Context,
 	return nil
 }
 
-// status of DATABASE_EXISTS can be True or False
+// Note: Status of DATABASE_EXISTS can be True or False
 const CONDITION_TYPE_DATABASE_EXISTS = "DatabaseExists"
 const CONDITION_REASON_DATABASE_EXISTS = "DatabaseExists"
 const CONDITION_MESSAGE_DATABASE_EXISTS = "The database exists"
@@ -500,7 +483,7 @@ func (reconciler *ApplicationReconciler) setConditionDatabaseExists(ctx context.
 	return nil
 }
 
-// status of SUCCEEDED can only be True
+// Note: Status of SUCCEEDED can only be True
 const CONDITION_TYPE_SUCCEEDED = "Succeeded"
 const CONDITION_REASON_SUCCEEDED = "InstallSucceeded"
 const CONDITION_MESSAGE_SUCCEEDED = "Application has been installed"
@@ -515,7 +498,7 @@ func (reconciler *ApplicationReconciler) setConditionSucceeded(ctx context.Conte
 	return nil
 }
 
-// status of DELETION_REQUEST_RECEIVED can only be True
+// Note: Status of DELETION_REQUEST_RECEIVED can only be True
 const CONDITION_TYPE_DELETION_REQUEST_RECEIVED = "DeletionRequestReceived"
 const CONDITION_REASON_DELETION_REQUEST_RECEIVED = "DeletionRequestReceived"
 const CONDITION_MESSAGE_DELETION_REQUEST_RECEIVED = "Application is supposed to be deleted"
@@ -586,25 +569,4 @@ func (reconciler *ApplicationReconciler) containsCondition(ctx context.Context,
 		}
 	}
 	return output
-}
-
-func (reconciler *ApplicationReconciler) getHashForSpec(specStruct interface{}) string {
-	byteArray, _ := json.Marshal(specStruct)
-	var hasher hash.Hash
-	hasher = ripemd160.New()
-	hasher.Reset()
-	hasher.Write(byteArray)
-	return hex.EncodeToString(hasher.Sum(nil))
-}
-
-func (reconciler *ApplicationReconciler) setHashToLabels(labels map[string]string, specHashActual string) map[string]string {
-	if labels == nil {
-		labels = map[string]string{}
-	}
-	labels[hashLabelName] = specHashActual
-	return labels
-}
-
-func (reconciler *ApplicationReconciler) getHashFromLabels(labels map[string]string) string {
-	return labels[hashLabelName]
 }
