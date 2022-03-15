@@ -7,15 +7,12 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/api/core/v1"
-	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/rest"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/apimachinery/pkg/util/intstr"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -23,12 +20,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	applicationsamplev1alpha1 "github.com/nheidloff/operator-sample-go/operator-application/api/v1alpha1"
-	"github.com/nheidloff/operator-sample-go/operator-application/utilities"
 	databasesamplev1alpha1 "github.com/nheidloff/operator-sample-go/operator-database/api/v1alpha1"
 )
-
-var kubernetesServerVersion string
-var runsOnOpenShift bool = false
 
 const finalizer = "database.sample.third.party/finalizer"
 
@@ -100,29 +93,9 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 		return ctrl.Result{}, nil
 	}
 
-	database := &databasesamplev1alpha1.Database{}
-	databaseDefinition := reconciler.defineDatabase(application)
-	err = reconciler.Get(ctx, types.NamespacedName{Name: application.Spec.DatabaseName, Namespace: application.Spec.DatabaseNamespace}, database)
+	_, err = reconciler.reconcileDatabase(ctx, application)
 	if err != nil {
-		if errors.IsNotFound(err) {
-			log.Info("Database resource " + application.Spec.DatabaseName + " not found. Creating or re-creating database")
-			err = reconciler.setConditionDatabaseExists(ctx, application, CONDITION_STATUS_FALSE)
-			if err != nil {
-				return ctrl.Result{}, err
-			}
-			// Note: Creating external resources from controllers is not always recommended for encapsulation and security reasons
-			err = reconciler.Create(ctx, databaseDefinition)
-			if err != nil {
-				log.Info("Failed to create database resource. Re-running reconcile.")
-				return ctrl.Result{}, err
-			} else {
-				// Note: Delay the next loop run since database creation can take time
-				return ctrl.Result{RequeueAfter: time.Second * 1}, nil
-			}
-		} else {
-			log.Info("Failed to get database resource " + application.Spec.DatabaseName + ". Re-running reconcile.")
-			return ctrl.Result{}, err
-		}
+		return ctrl.Result{}, err
 	}
 
 	// TODO: Create schema and sample data and check if data from the database can be accessed
@@ -139,57 +112,14 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 		return ctrl.Result{}, err
 	}
 
-	deployment := &appsv1.Deployment{}
-	deploymentDefinition := reconciler.defineDeployment(application)
-	err = reconciler.Get(ctx, types.NamespacedName{Name: deploymentName, Namespace: application.Namespace}, deployment)
+	_, err = reconciler.reconcileDeployment(ctx, application)
 	if err != nil {
-		if errors.IsNotFound(err) {
-			log.Info("Deployment resource " + deploymentName + " not found. Creating or re-creating deployment")
-			err = reconciler.Create(ctx, deploymentDefinition)
-			if err != nil {
-				log.Info("Failed to create deployment resource. Re-running reconcile.")
-				return ctrl.Result{}, err
-			}
-		} else {
-			log.Info("Failed to get deployment resource " + deploymentName + ". Re-running reconcile.")
-			return ctrl.Result{}, err
-		}
-	} else {
-		specHashTarget := utilities.GetHashForSpec(&deploymentDefinition.Spec)
-		specHashActual := utilities.GetHashFromLabels(deployment.Labels)
-		// Note: When using the hash, the controller will not revert manual changes of the amount of replicas in the deployment
-		if specHashActual != specHashTarget {
-			var current int32 = *deployment.Spec.Replicas
-			var expected int32 = *deploymentDefinition.Spec.Replicas
-			if current != expected {
-				deployment.Spec.Replicas = &expected
-				deployment.Labels = utilities.SetHashToLabels(deployment.Labels, specHashTarget)
-				err = reconciler.Update(ctx, deployment)
-				if err != nil {
-					log.Info("Failed to update deployment resource. Re-running reconcile.")
-					return ctrl.Result{}, err
-				}
-			}
-		}
+		return ctrl.Result{}, err
 	}
 
-	serviceDefinition := reconciler.defineService(application)
-	service := &corev1.Service{}
-	err = reconciler.Get(ctx, types.NamespacedName{Name: serviceName, Namespace: application.Namespace}, service)
+	_, err = reconciler.reconcileService(ctx, application)
 	if err != nil {
-		if errors.IsNotFound(err) {
-			log.Info("Service resource " + serviceName + " not found. Creating or re-creating service")
-			err = reconciler.Create(ctx, serviceDefinition)
-			if err != nil {
-				log.Info("Failed to create service resource. Re-running reconcile.")
-				return ctrl.Result{}, err
-			}
-		} else {
-			log.Info("Failed to get service resource " + serviceName + ". Re-running reconcile.")
-			return ctrl.Result{}, err
-		}
-	} else {
-		// Note: For simplication purposes secrets are not updated - see deployment section
+		return ctrl.Result{}, err
 	}
 
 	// Note: Commented out for dev productivity only
@@ -221,138 +151,6 @@ func (reconciler *ApplicationReconciler) SetupWithManager(mgr ctrl.Manager) erro
 		// Note: Possible, but not used in this scenario
 		//Owns(&databasesamplev1alpha1.Database{}).
 		Complete(reconciler)
-}
-
-func (reconciler *ApplicationReconciler) defineService(application *applicationsamplev1alpha1.Application) *corev1.Service {
-	labels := map[string]string{labelKey: labelValue}
-
-	service := &corev1.Service{
-		TypeMeta:   metav1.TypeMeta{APIVersion: "v1", Kind: "Service"},
-		ObjectMeta: metav1.ObjectMeta{Name: serviceName, Namespace: application.Namespace, Labels: labels},
-		Spec: corev1.ServiceSpec{
-			Type: corev1.ServiceTypeNodePort,
-			Ports: []corev1.ServicePort{{
-				Port:     port,
-				NodePort: nodePort,
-				Protocol: "TCP",
-				TargetPort: intstr.IntOrString{
-					IntVal: port,
-				},
-			}},
-			Selector: labels,
-		},
-	}
-
-	ctrl.SetControllerReference(application, service, reconciler.Scheme)
-	return service
-}
-
-func (reconciler *ApplicationReconciler) defineDatabase(application *applicationsamplev1alpha1.Application) *databasesamplev1alpha1.Database {
-	database := &databasesamplev1alpha1.Database{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      application.Spec.DatabaseName,
-			Namespace: application.Spec.DatabaseNamespace,
-		},
-		Spec: databasesamplev1alpha1.DatabaseSpec{
-			User:        databaseUser,
-			Password:    databasePassword,
-			Url:         databaseUrl,
-			Certificate: databaseCertificate,
-		},
-	}
-
-	// Note: Possible, but not used in this scenario
-	//ctrl.SetControllerReference(application, database, reconciler.Scheme)
-	return database
-}
-
-func (reconciler *ApplicationReconciler) defineDeployment(application *applicationsamplev1alpha1.Application) *appsv1.Deployment {
-	replicas := application.Spec.AmountPods
-	labels := map[string]string{labelKey: labelValue}
-
-	deployment := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      deploymentName,
-			Namespace: application.Namespace,
-		},
-		Spec: appsv1.DeploymentSpec{
-			Replicas: &replicas,
-			Selector: &metav1.LabelSelector{
-				MatchLabels: labels,
-			},
-			Template: corev1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{
-					Labels: labels,
-				},
-				Spec: corev1.PodSpec{
-					Containers: []corev1.Container{{
-						Image: image,
-						Name:  containerName,
-						Ports: []corev1.ContainerPort{{
-							ContainerPort: port,
-						}},
-						Env: []corev1.EnvVar{{
-							Name: secretGreetingMessageLabel,
-							ValueFrom: &v1.EnvVarSource{
-								SecretKeyRef: &v1.SecretKeySelector{
-									LocalObjectReference: v1.LocalObjectReference{
-										Name: secretName,
-									},
-									Key: secretGreetingMessageLabel,
-								},
-							}},
-						},
-						ReadinessProbe: &v1.Probe{
-							ProbeHandler: v1.ProbeHandler{
-								HTTPGet: &v1.HTTPGetAction{Path: "/q/health/live", Port: intstr.IntOrString{
-									IntVal: port,
-								}},
-							},
-							InitialDelaySeconds: 20,
-						},
-						LivenessProbe: &v1.Probe{
-							ProbeHandler: v1.ProbeHandler{
-								HTTPGet: &v1.HTTPGetAction{Path: "/q/health/ready", Port: intstr.IntOrString{
-									IntVal: port,
-								}},
-							},
-							InitialDelaySeconds: 40,
-						},
-					}},
-				},
-			},
-		},
-	}
-
-	specHashActual := utilities.GetHashForSpec(&deployment.Spec)
-	deployment.Labels = utilities.SetHashToLabels(nil, specHashActual)
-
-	ctrl.SetControllerReference(application, deployment, reconciler.Scheme)
-	return deployment
-}
-
-func (reconciler *ApplicationReconciler) checkPrerequisites() bool {
-	discoveryClient, err := discovery.NewDiscoveryClientForConfig(managerConfig)
-	if err == nil {
-		serverVersion, err := discoveryClient.ServerVersion()
-		if err == nil {
-			kubernetesServerVersion = serverVersion.String()
-			fmt.Println("Kubernetes Server Version: " + kubernetesServerVersion)
-
-			apiGroup, _, err := discoveryClient.ServerGroupsAndResources()
-			if err == nil {
-				for i := 0; i < len(apiGroup); i++ {
-					if apiGroup[i].Name == "route.openshift.io" {
-						runsOnOpenShift = true
-					}
-				}
-			}
-		}
-	}
-	// TODO: Check correct Kubernetes version and distro
-
-	// Note: This function could also check whether external resources exist if the external resource is not created/owned by this controller
-	return true
 }
 
 func (reconciler *ApplicationReconciler) setGlobalVariables(application *applicationsamplev1alpha1.Application) {
