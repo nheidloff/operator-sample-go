@@ -63,5 +63,5 @@ See the readme documents for all components:
 * [Finding out the Kubernetes Version in Operators](http://heidloff.net/article/finding-kubernetes-version-capabilities-operators/)
 * [Creating Database Schemas in Kubernetes Operators](http://heidloff.net/article/creating-database-schemas-kubernetes-operators/)
 * [Resources to build Kubernetes Operators](http://heidloff.net/articles/resources-to-build-kubernetes-operators/)
-* Updating Resources from Kubernetes Operators
+* [Updating Resources from Kubernetes Operators](http://heidloff.net/article/updating-resources-kubernetes-operators/)
 * Storing State of Kubernetes Resources with Conditions
