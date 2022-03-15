@@ -134,23 +134,9 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 		return ctrl.Result{}, err
 	}
 
-	secret := &corev1.Secret{}
-	secretDefinition := reconciler.defineSecret(application)
-	err = reconciler.Get(ctx, types.NamespacedName{Name: secretName, Namespace: application.Namespace}, secret)
+	_, err = reconciler.reconcileSecret(ctx, application)
 	if err != nil {
-		if errors.IsNotFound(err) {
-			log.Info("Secret resource " + secretName + " not found. Creating or re-creating secret")
-			err = reconciler.Create(ctx, secretDefinition)
-			if err != nil {
-				log.Info("Failed to create secret resource. Re-running reconcile.")
-				return ctrl.Result{}, err
-			}
-		} else {
-			log.Info("Failed to get secret resource " + secretName + ". Re-running reconcile.")
-			return ctrl.Result{}, err
-		}
-	} else {
-		// Note: For simplication purposes secrets are not updated - see deployment section
+		return ctrl.Result{}, err
 	}
 
 	deployment := &appsv1.Deployment{}
@@ -259,23 +245,6 @@ func (reconciler *ApplicationReconciler) defineService(application *applications
 
 	ctrl.SetControllerReference(application, service, reconciler.Scheme)
 	return service
-}
-
-func (reconciler *ApplicationReconciler) defineSecret(application *applicationsamplev1alpha1.Application) *corev1.Secret {
-	stringData := make(map[string]string)
-	stringData[secretGreetingMessageLabel] = greetingMessage
-
-	secret := &corev1.Secret{
-		TypeMeta:   metav1.TypeMeta{APIVersion: "v1", Kind: "Secret"},
-		ObjectMeta: metav1.ObjectMeta{Name: secretName, Namespace: application.Namespace},
-		Immutable:  new(bool),
-		Data:       map[string][]byte{},
-		StringData: stringData,
-		Type:       "Opaque",
-	}
-
-	ctrl.SetControllerReference(application, secret, reconciler.Scheme)
-	return secret
 }
 
 func (reconciler *ApplicationReconciler) defineDatabase(application *applicationsamplev1alpha1.Application) *databasesamplev1alpha1.Database {
