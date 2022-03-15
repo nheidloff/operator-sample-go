@@ -15,7 +15,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	applicationsamplev1alpha1 "github.com/nheidloff/operator-sample-go/operator-application/api/v1alpha1"
-	"github.com/nheidloff/operator-sample-go/operator-application/controllers"
+	applicationcontroller "github.com/nheidloff/operator-sample-go/operator-application/controllers/application"
 	databasesamplev1alpha1 "github.com/nheidloff/operator-sample-go/operator-database/api/v1alpha1"
 	//+kubebuilder:scaffold:imports
 )
@@ -64,7 +64,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controllers.ApplicationReconciler{
+	if err = (&applicationcontroller.ApplicationReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {

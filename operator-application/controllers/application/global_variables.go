@@ -1,4 +1,4 @@
-package controllers
+package applicationcontroller
 
 var secretName string
 var deploymentName string
