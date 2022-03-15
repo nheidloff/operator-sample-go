@@ -14,6 +14,14 @@ See the readme documents for all components:
 * [Microservice](simple-microservice/README.md)
 * [Application operator](operator-application/README.md)
 
+### Documentation
+
+* [Updating Resources from Kubernetes Operators](http://heidloff.net/article/updating-resources-kubernetes-operators/)
+* [Deleting Resources in Kubernetes Operators](http://heidloff.net/article/deleting-resources-kubernetes-operators/)
+* [Storing State of Kubernetes Resources with Conditions](http://heidloff.net/article/storing-state-status-kubernetes-resources-conditions-operators-go/)
+* [Accessing third Party Custom Resources in Go Operators](http://heidloff.net/article/accessing-third-party-custom-resources-go-operators/)
+* [Finding out the Kubernetes Version in Operators](http://heidloff.net/article/finding-kubernetes-version-capabilities-operators/)
+
 ### Current Capabilities
 
 * Kubernetes version and capabilities
@@ -56,12 +64,10 @@ See the readme documents for all components:
 * Pointers
 * Constants
 
-### Blogs
+### Resources
 
-* [Deleting Resources in Kubernetes Operators](http://heidloff.net/article/deleting-resources-kubernetes-operators/)
-* [Accessing third Party Custom Resources in Go Operators](http://heidloff.net/article/accessing-third-party-custom-resources-go-operators/)
-* [Finding out the Kubernetes Version in Operators](http://heidloff.net/article/finding-kubernetes-version-capabilities-operators/)
-* [Creating Database Schemas in Kubernetes Operators](http://heidloff.net/article/creating-database-schemas-kubernetes-operators/)
+* [OperatorSDK Best Practices](https://sdk.operatorframework.io/docs/best-practices/best-practices/)
+* [Intro to the Operator Lifecycle Manager](https://www.youtube.com/watch?v=5PorcMTYZTo)
+* [Go Modules](https://www.youtube.com/watch?v=Z1VhG7cf83M)
 * [Resources to build Kubernetes Operators](http://heidloff.net/articles/resources-to-build-kubernetes-operators/)
-* [Updating Resources from Kubernetes Operators](http://heidloff.net/article/updating-resources-kubernetes-operators/)
-* [Storing State of Kubernetes Resources with Conditions](http://heidloff.net/article/storing-state-status-kubernetes-resources-conditions-operators-go/)
+* [Quarkus sample](https://github.com/nheidloff/quarkus-operator-microservice-database)
