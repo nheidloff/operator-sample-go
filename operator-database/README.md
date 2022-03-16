@@ -46,7 +46,7 @@ $ kubectl delete -f config/samples/database.sample_v1alpha1_database.yaml -n dat
 
 ### Development Commands
 
-Commands used for the Project Creation:
+Commands used for the project creation:
 
 ```
 $ operator-sdk init --domain third.party --repo github.com/nheidloff/operator-sample-go/operator-database
