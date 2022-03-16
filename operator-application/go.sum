@@ -352,6 +352,8 @@ github.com/nheidloff/operator-sample-go/operator-database v0.0.0-20220309200702-
 github.com/nheidloff/operator-sample-go/operator-database v0.0.0-20220309200702-0f81ec90e1b4/go.mod h1:TG3x54h5uwDE5Oxu3BT4BXOmCr7T+WvTMi90CRpRRLY=
 github.com/nheidloff/operator-sample-go/operator-database v0.0.0-20220310110339-73df02eea3ae h1:dHiUcqwSPQ9mCNPSb/k/802ef/OGT/NnEiFdYSzDMUk=
 github.com/nheidloff/operator-sample-go/operator-database v0.0.0-20220310110339-73df02eea3ae/go.mod h1:TG3x54h5uwDE5Oxu3BT4BXOmCr7T+WvTMi90CRpRRLY=
+github.com/nheidloff/operator-sample-go/operator-database v0.0.4 h1:cTsXJmiChQNLxFtbO0geNU0UEU3uNsjhR9pChx+TlPA=
+github.com/nheidloff/operator-sample-go/operator-database v0.0.4/go.mod h1:TG3x54h5uwDE5Oxu3BT4BXOmCr7T+WvTMi90CRpRRLY=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e h1:fD57ERR4JtEqsWbfPhv4DMiApHyliiK5xCTNVSPiaAs=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLANZcx1PVRCS0qkT7pwLkGfwJo4zjcN/Tysno=
 github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI8A=
