@@ -12,7 +12,6 @@ The following instructions assume that you use the managed Kubernetes service on
 * docker
 * [ibmcloud](https://cloud.ibm.com/docs/cli?topic=cli-install-ibmcloud-cli) (if IBM Cloud is used)
 
-
 ### Setup and local Usage
 
 Get the code:
@@ -59,7 +58,7 @@ All resources can be deleted:
 $ kubectl delete -f config/samples/application.sample_v1alpha1_application.yaml
 ```
 
-### Setup and Deployment
+### Setup and manual Deployment
 
 Get the code:
 
@@ -128,24 +127,37 @@ Delete Operator:
 $ make undeploy
 ```
 
+### Setup and Deployment via Operator Lifecycle Manager (OLM)
+
+Follow the same steps as above in the section [Setup and manual Deployment](#setup-and-manual-deployment) up to the step 'Deploy Operator'.
+
+Build and push the Bundle Image:
+
+```
+$ export REGISTRY='docker.io'
+$ export ORG='nheidloff'
+$ export BUNDLEIMAGE="application-controller-bundle:v1"
+$ make bundle-build BUNDLE_IMG="$REGISTRY/$ORG/$BUNDLEIMAGE"
+$ docker push "$REGISTRY/$ORG/$BUNDLEIMAGE"
+```
+
+
 ### Development Commands
 
-Manual Setup of the Application Resources only:
-
-```
-$ kubectl apply -f kubernetes/secret.yaml
-$ kubectl apply -f kubernetes/microservice-deployment.yaml 
-$ kubectl apply -f kubernetes/microservice-service.yaml
-$ kubectl delete -f kubernetes/microservice-service.yaml
-$ kubectl delete -f kubernetes/microservice-deployment.yaml 
-$ kubectl delete -f kubernetes/secret.yaml
-```
-
-Commands used for the Project Creation:
+Commands used for the project creation:
 
 ```
 $ operator-sdk init --domain ibm.com --repo github.com/nheidloff/operator-sample-go/operator-application
 $ operator-sdk create api --group application.sample --version v1alpha1 --kind Application --resource --controller
 $ make generate
 $ make manifests
+```
+
+Commands used for the bundle creation:
+
+```
+$ export REGISTRY='docker.io'
+$ export ORG='nheidloff'
+$ export IMAGE='application-controller:v10'
+$ make bundle IMG="$REGISTRY/$ORG/$IMAGE"
 ```
