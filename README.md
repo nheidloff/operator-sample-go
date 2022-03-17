@@ -16,11 +16,15 @@ See the readme documents for all components:
 
 ### Documentation
 
-* [Creating and updating Resources from Kubernetes Operators](http://heidloff.net/article/updating-resources-kubernetes-operators/)
-* [Deleting Resources in Kubernetes Operators](http://heidloff.net/article/deleting-resources-kubernetes-operators/)
-* [Storing State of Kubernetes Resources with Conditions](http://heidloff.net/article/storing-state-status-kubernetes-resources-conditions-operators-go/)
+* [Creating and updating Resources from Operators](http://heidloff.net/article/updating-resources-kubernetes-operators/)
+* [Deleting Resources in Operators](http://heidloff.net/article/deleting-resources-kubernetes-operators/)
+* [Storing State of Resources with Conditions](http://heidloff.net/article/storing-state-status-kubernetes-resources-conditions-operators-go/)
 * [Accessing third Party Custom Resources in Go Operators](http://heidloff.net/article/accessing-third-party-custom-resources-go-operators/)
 * [Finding out the Kubernetes Versions and Capabilities in Operators](http://heidloff.net/article/finding-kubernetes-version-capabilities-operators/)
+* Coming soon: Importing external Packages in Operators
+* Coming soon: Using Inheritance-like Mechanisms in Go
+* Coming soon: Deploying Operators to Kubernetes
+* Coming soon: Deploying Operators with the Operator Lifecycle Manager
 
 ### Undocumented Capabilities
 
