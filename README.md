@@ -6,7 +6,7 @@ This project contains Kubernetes operator samples that demonstrate best practice
 
 The project contains a custom application controller, a database controller simulating an external resource and a sample microservice. The easiest way to get started is to run the application controller only and refer to the database resource definition and the built microservice image on Docker.io.
 
-Follow these [instructions](operator-application/README.md#setup-and-usage) to run the application controller.
+Follow these [instructions](operator-application/README.md#setup-and-local-usage) to run the application controller.
 
 See the readme documents for all components:
 
