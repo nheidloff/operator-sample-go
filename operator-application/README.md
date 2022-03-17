@@ -2,9 +2,18 @@
 
 See below for instructions how to set up and run the application operator as well as the used commands for the development of it.
 
-### Setup and local Usage
-
 The following instructions assume that you use the managed Kubernetes service on the IBM Cloud. You can also use any other Kubernetes service or OpenShift.
+
+### Prerequisites
+
+* [operator-sdk](https://sdk.operatorframework.io/docs/installation/) (comes with Golang)
+* git
+* kubectl
+* docker
+* [ibmcloud](https://cloud.ibm.com/docs/cli?topic=cli-install-ibmcloud-cli) (if IBM Cloud is used)
+
+
+### Setup and local Usage
 
 Get the code:
 
@@ -52,8 +61,6 @@ $ kubectl delete -f config/samples/application.sample_v1alpha1_application.yaml
 
 ### Setup and Deployment
 
-The following instructions assume that you use the managed Kubernetes service on the IBM Cloud. You can also use any other Kubernetes service or OpenShift.
-
 Get the code:
 
 ```
@@ -76,7 +83,6 @@ $ kubectl create ns test1
 $ kubectl config set-context --current --namespace=test1
 $ kubectl create ns database
 $ kubectl apply -f ../operator-database/config/crd/bases/database.sample.third.party_databases.yaml
-$ kubectl apply -f config/crd/bases/application.sample.ibm.com_applications.yaml
 ```
 
 Build and push the Operator Image:
@@ -107,6 +113,13 @@ Test Operator:
 ```
 $ kubectl apply -f config/samples/application.sample_v1alpha1_application.yaml
 $ kubectl delete -f config/samples/application.sample_v1alpha1_application.yaml
+```
+
+The sample endpoint can be triggered via '<your-ip>:30548/hello':
+
+```
+$ ibmcloud ks worker ls --cluster niklas-heidloff-fra02-b3c.4x16
+$ open http://159.122.86.194:30548/hello
 ```
 
 Delete Operator:

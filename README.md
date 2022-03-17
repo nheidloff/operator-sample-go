@@ -51,7 +51,8 @@ See the readme documents for all components:
 
 ### Resources
 
-* [OperatorSDK Best Practices](https://sdk.operatorframework.io/docs/best-practices/best-practices/)
+* [Operator SDK](https://sdk.operatorframework.io/docs/overview/)
+* [Operator SDK Best Practices](https://sdk.operatorframework.io/docs/best-practices/best-practices/)
 * [Intro to the Operator Lifecycle Manager](https://www.youtube.com/watch?v=5PorcMTYZTo)
 * [Go Modules](https://www.youtube.com/watch?v=Z1VhG7cf83M)
 * [Resources to build Kubernetes Operators](http://heidloff.net/articles/resources-to-build-kubernetes-operators/)
