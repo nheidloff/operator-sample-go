@@ -35,6 +35,8 @@ See the readme documents for all components:
 * Versioning
 * Webhooks
 * Metrics
+* Events
+* Operator cleanup
 * Scope: namespace vs global
 * Phase 3 - 5
 * Testing
@@ -42,15 +44,6 @@ See the readme documents for all components:
 * Creations of database schemas
 * Templates for customizability
 * Stateful resources (via uid, resourceVersion and in-memory store)
-
-### Go Development Techniques To Be Documented
-
-* IDE usage and tips
-* Debugging
-* Where to find documentation
-* Imports and packages
-* Pointers
-* Constants
 
 ### Resources
 
