@@ -19,6 +19,10 @@ type ApplicationSpec struct {
 }
 
 type ApplicationStatus struct {
+	// +patchMergeKey=type
+	// +patchStrategy=merge
+	// +listType=map
+	// +listMapKey=type
 	Conditions    []metav1.Condition `json:"conditions"`
 	SchemaCreated bool               `json:"schemaCreated"`
 }
@@ -44,4 +48,12 @@ type ApplicationList struct {
 
 func init() {
 	SchemeBuilder.Register(&Application{}, &ApplicationList{})
+}
+
+func (application *Application) GetConditions() []metav1.Condition {
+	return application.Status.Conditions
+}
+
+func (application *Application) SetConditions(conditions []metav1.Condition) {
+	application.Status.Conditions = conditions
 }

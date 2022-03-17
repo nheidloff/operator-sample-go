@@ -123,6 +123,9 @@ spec:
                   - type
                   type: object
                 type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
               schemaCreated:
                 type: boolean
             required:
