@@ -99,22 +99,24 @@ func (reconciler *ApplicationReconciler) reconcileDeployment(ctx context.Context
 			return ctrl.Result{}, err
 		}
 	} else {
+		// Note: Using the hashes allows more efficient checking of changes
+		// Note: Whether or not to use the hashes depends on the scenarios
+		// Note: In this scenario, we want to the controller to change back the number of replicas, if changed manually in 'Deployment'
 		specHashTarget := utilities.GetHashForSpec(&deploymentDefinition.Spec)
-		specHashActual := utilities.GetHashFromLabels(deployment.Labels)
-		// Note: When using the hash, the controller will not revert manual changes of the amount of replicas in the deployment
-		if specHashActual != specHashTarget {
-			var current int32 = *deployment.Spec.Replicas
-			var expected int32 = *deploymentDefinition.Spec.Replicas
-			if current != expected {
-				deployment.Spec.Replicas = &expected
-				deployment.Labels = utilities.SetHashToLabels(deployment.Labels, specHashTarget)
-				err = reconciler.Update(ctx, deployment)
-				if err != nil {
-					log.Info("Failed to update deployment resource. Re-running reconcile.")
-					return ctrl.Result{}, err
-				}
+		//specHashActual := utilities.GetHashFromLabels(deployment.Labels)
+		//if specHashActual != specHashTarget {
+		var current int32 = *deployment.Spec.Replicas
+		var expected int32 = *deploymentDefinition.Spec.Replicas
+		if current != expected {
+			deployment.Spec.Replicas = &expected
+			deployment.Labels = utilities.SetHashToLabels(deployment.Labels, specHashTarget)
+			err = reconciler.Update(ctx, deployment)
+			if err != nil {
+				log.Info("Failed to update deployment resource. Re-running reconcile.")
+				return ctrl.Result{}, err
 			}
 		}
+		//}
 	}
 	return ctrl.Result{}, nil
 }
