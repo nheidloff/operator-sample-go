@@ -4,6 +4,12 @@ See below for instructions how to set up and run the application operator as wel
 
 The following instructions assume that you use the managed Kubernetes service on the IBM Cloud. You can also use any other Kubernetes service or OpenShift.
 
+There are three ways to run the operator:
+
+1) [Local Go Operator](#setup-and-local-usage) 
+2) [Kubernetes Operator manually deployed](#setup-and-manual-deployment)
+3) [Kubernetes Operator deployed via OLM](#setup-and-deployment-via-operator-lifecycle-manager)
+
 ### Prerequisites
 
 * [operator-sdk](https://sdk.operatorframework.io/docs/installation/) (comes with Golang)
@@ -127,7 +133,7 @@ Delete Operator:
 $ make undeploy
 ```
 
-### Setup and Deployment via Operator Lifecycle Manager (OLM)
+### Setup and Deployment via Operator Lifecycle Manager
 
 Follow the same steps as above in the section [Setup and manual Deployment](#setup-and-manual-deployment) up to the step 'Deploy Operator'.
 
@@ -141,6 +147,11 @@ $ make bundle-build BUNDLE_IMG="$REGISTRY/$ORG/$BUNDLEIMAGE"
 $ docker push "$REGISTRY/$ORG/$BUNDLEIMAGE"
 ```
 
+```
+$ operator-sdk run bundle "$REGISTRY/$ORG/$BUNDLEIMAGE" -n operators
+```
+
+To test the operator, follow the instructions at the bottom of the section [Setup and manual Deployment](#setup-and-manual-deployment).
 
 ### Development Commands
 
