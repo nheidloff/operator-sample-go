@@ -22,7 +22,7 @@ See the readme documents for all components:
 * [Accessing third Party Custom Resources in Go Operators](http://heidloff.net/article/accessing-third-party-custom-resources-go-operators/)
 * [Finding out the Kubernetes Versions and Capabilities in Operators](http://heidloff.net/article/finding-kubernetes-version-capabilities-operators/)
 * [Importing Go Modules in Operators](http://heidloff.net/article/importing-go-modules-kubernetes-operators/)
-* Coming soon: Using Inheritance-like Mechanisms in Go
+* [Using object-oriented Concepts in Golang based Operators](http://heidloff.net/article/object-oriented-concepts-golang/)
 * Coming soon: Deploying Operators to Kubernetes
 * Coming soon: Deploying Operators with the Operator Lifecycle Manager
 
