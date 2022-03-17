@@ -51,6 +51,8 @@ $ make install run
 $ kubectl apply -f config/samples/application.sample_v1alpha1_application.yaml
 ```
 
+To debug, press F5 (Run - Start Debugging) instead of 'make install run'. The directory 'operator-application' needs to be root in VSCode.
+
 The sample endpoint can be triggered via '<your-ip>:30548/hello':
 
 ```
@@ -95,7 +97,7 @@ Build and push the Operator Image:
 ```
 $ export REGISTRY='docker.io'
 $ export ORG='nheidloff'
-$ export IMAGE='application-controller:v1'
+$ export IMAGE='application-controller:v11'
 $ make generate
 $ make manifests
 $ make docker-build IMG="$REGISTRY/$ORG/$IMAGE"
@@ -142,7 +144,7 @@ Build and push the Bundle Image:
 ```
 $ export REGISTRY='docker.io'
 $ export ORG='nheidloff'
-$ export BUNDLEIMAGE="application-controller-bundle:v1"
+$ export BUNDLEIMAGE="application-controller-bundle:v11"
 $ make bundle-build BUNDLE_IMG="$REGISTRY/$ORG/$BUNDLEIMAGE"
 $ docker push "$REGISTRY/$ORG/$BUNDLEIMAGE"
 ```
