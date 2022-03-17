@@ -76,7 +76,7 @@ $ kubectl create ns test1
 $ kubectl config set-context --current --namespace=test1
 $ kubectl create ns database
 $ kubectl apply -f ../operator-database/config/crd/bases/database.sample.third.party_databases.yaml
-$ kubectl apply -f ../operator-application/config/crd/bases/application.sample.ibm.com_applications.yaml
+$ kubectl apply -f config/crd/bases/application.sample.ibm.com_applications.yaml
 ```
 
 Build and push the Operator Image:
