@@ -23,7 +23,7 @@ See the readme documents for all components:
 * [Finding out the Kubernetes Versions and Capabilities in Operators](http://heidloff.net/article/finding-kubernetes-version-capabilities-operators/)
 * [Importing Go Modules in Operators](http://heidloff.net/article/importing-go-modules-kubernetes-operators/)
 * [Using object-oriented Concepts in Golang based Operators](http://heidloff.net/article/object-oriented-concepts-golang/)
-* Coming soon: Deploying Operators to Kubernetes
+* [Manually deploying Operators to Kubernetes](http://heidloff.net/article/manually-deploying-operators-to-kubernetes/)
 * Coming soon: Deploying Operators with the Operator Lifecycle Manager
 
 ### Undocumented Capabilities
