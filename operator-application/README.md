@@ -137,7 +137,14 @@ $ make undeploy
 
 ### Setup and Deployment via Operator Lifecycle Manager
 
-Follow the same steps as above in the section [Setup and manual Deployment](#setup-and-manual-deployment) up to the step 'Deploy Operator'.
+Follow the same steps as above in the section [Setup and manual Deployment](#setup-and-manual-deployment) up to the step 'Deploy Operator' (expect that you don't have to deploy the application custom resource definition).
+
+Install the Operator Lifecycle Manager (OLM):
+
+```
+$ operator-sdk olm install latest 
+$ kubectl get all -n olm
+```
 
 Build and push the Bundle Image:
 
@@ -151,6 +158,7 @@ $ docker push "$REGISTRY/$ORG/$BUNDLEIMAGE"
 
 ```
 $ operator-sdk run bundle "$REGISTRY/$ORG/$BUNDLEIMAGE" -n operators
+$ oc get csv operator-application.v0.0.1 -oyaml
 ```
 
 To test the operator, follow the instructions at the bottom of the section [Setup and manual Deployment](#setup-and-manual-deployment).

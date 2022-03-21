@@ -24,7 +24,7 @@ See the readme documents for all components:
 * [Importing Go Modules in Operators](http://heidloff.net/article/importing-go-modules-kubernetes-operators/)
 * [Using object-oriented Concepts in Golang based Operators](http://heidloff.net/article/object-oriented-concepts-golang/)
 * [Manually deploying Operators to Kubernetes](http://heidloff.net/article/manually-deploying-operators-to-kubernetes/)
-* Coming soon: Deploying Operators with the Operator Lifecycle Manager
+* [Deploying Operators with the Operator Lifecycle Manager](http://heidloff.net/article/deploying-operators-operator-lifecycle-manager-olm/)
 
 ### Undocumented Capabilities
 
