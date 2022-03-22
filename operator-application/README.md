@@ -97,7 +97,7 @@ Build and push the Operator Image:
 ```
 $ export REGISTRY='docker.io'
 $ export ORG='nheidloff'
-$ export IMAGE='application-controller:v11'
+$ export IMAGE='application-controller:v12'
 $ make generate
 $ make manifests
 $ make docker-build IMG="$REGISTRY/$ORG/$IMAGE"
@@ -174,7 +174,7 @@ To test the operator, follow the instructions at the bottom of the section [Setu
 
 ### Development Commands
 
-Commands used for the project creation:
+Commands for the project creation:
 
 ```
 $ operator-sdk init --domain ibm.com --repo github.com/nheidloff/operator-sample-go/operator-application
@@ -183,11 +183,20 @@ $ make generate
 $ make manifests
 ```
 
-Commands used for the bundle creation:
+Commands for the bundle creation:
 
 ```
 $ export REGISTRY='docker.io'
 $ export ORG='nheidloff'
 $ export IMAGE='application-controller:v10'
 $ make bundle IMG="$REGISTRY/$ORG/$IMAGE"
+```
+
+Commands for the webhook creations:
+
+```
+$ operator-sdk create webhook --group application.sample --version v1alpha1 --kind Application --defaulting --programmatic-validation --conversion
+$ make manifests
+$ make install
+$ make run ENABLE_WEBHOOKS=false
 ```
