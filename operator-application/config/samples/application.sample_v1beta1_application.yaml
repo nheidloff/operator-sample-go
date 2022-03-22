@@ -1,0 +1,6 @@
+apiVersion: application.sample.ibm.com/v1beta1
+kind: Application
+metadata:
+  name: application-sample
+spec:
+  # TODO(user): Add fields here
