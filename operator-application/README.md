@@ -90,6 +90,7 @@ $ kubectl create ns test1
 $ kubectl config set-context --current --namespace=test1
 $ kubectl create ns database
 $ kubectl apply -f ../operator-database/config/crd/bases/database.sample.third.party_databases.yaml
+$ kubectl apply -f https://github.com/jetstack/cert-manager/releases/latest/download/cert-manager.yaml
 ```
 
 Build and push the Operator Image:
@@ -97,7 +98,7 @@ Build and push the Operator Image:
 ```
 $ export REGISTRY='docker.io'
 $ export ORG='nheidloff'
-$ export IMAGE='application-controller:v12'
+$ export IMAGE='application-controller:v16'
 $ make generate
 $ make manifests
 $ make docker-build IMG="$REGISTRY/$ORG/$IMAGE"

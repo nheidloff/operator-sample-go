@@ -42,6 +42,7 @@ var _ webhook.Defaulter = &Application{}
 func (r *Application) Default() {
 	applicationlog.Info("niklas default")
 	applicationlog.Info("default", "name", r.Name)
+	r.Spec.DatabaseName = "Niklas db name"
 
 	// TODO(user): fill in your defaulting logic.
 }

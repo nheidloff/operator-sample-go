@@ -1,6 +1,10 @@
 apiVersion: application.sample.ibm.com/v1beta1
 kind: Application
 metadata:
-  name: application-sample
+  name: application2
 spec:
-  # TODO(user): Add fields here
+  version: "1.0.0"
+  amountPods: 1
+  databaseName: database
+  databaseNamespace: database
+  title: Movies

@@ -29,6 +29,7 @@ type ApplicationStatus struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:storageversion
 
 type Application struct {
 	metav1.TypeMeta   `json:",inline"`
