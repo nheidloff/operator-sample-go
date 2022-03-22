@@ -40,6 +40,7 @@ type ApplicationStatus struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:storageversion
 
 // Application is the Schema for the applications API
 type Application struct {
