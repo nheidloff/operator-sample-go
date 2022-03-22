@@ -151,9 +151,18 @@ Build and push the Bundle Image:
 ```
 $ export REGISTRY='docker.io'
 $ export ORG='nheidloff'
-$ export BUNDLEIMAGE="application-controller-bundle:v11"
+$ export BUNDLEIMAGE="application-controller-bundle:v15"
 $ make bundle-build BUNDLE_IMG="$REGISTRY/$ORG/$BUNDLEIMAGE"
 $ docker push "$REGISTRY/$ORG/$BUNDLEIMAGE"
+```
+
+Before running the application-controller-bundle (the application operator), the database operator needs to be deployed since it is defined as 'required' in the application CSV.
+
+```
+$ cd ../operator-database
+$ export BUNDLEIMAGEDATABASE="database-controller-bundle:v1"
+$ operator-sdk run bundle "$REGISTRY/$ORG/$BUNDLEIMAGEDATABASE" -n operators
+$ cd ../operator-application
 ```
 
 ```

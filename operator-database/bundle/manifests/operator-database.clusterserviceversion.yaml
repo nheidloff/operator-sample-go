@@ -5,39 +5,34 @@ metadata:
     alm-examples: |-
       [
         {
-          "apiVersion": "application.sample.ibm.com/v1alpha1",
-          "kind": "Application",
+          "apiVersion": "database.sample.third.party/v1alpha1",
+          "kind": "Database",
           "metadata": {
-            "name": "application1"
+            "name": "database"
           },
           "spec": {
-            "amountPods": 1,
-            "databaseName": "database",
-            "databaseNamespace": "database",
-            "version": "1.0.0"
+            "certificate": "certificate",
+            "password": "password",
+            "url": "url",
+            "user": "name"
           }
         }
       ]
     capabilities: Basic Install
     operators.operatorframework.io/builder: operator-sdk-v1.18.0
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
-  name: operator-application.v0.0.1
+  name: operator-database.v0.0.1
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
     owned:
-    - displayName: Application
-      kind: Application
-      name: applications.application.sample.ibm.com
-      version: v1alpha1
-    required:
     - displayName: Database
       kind: Database
       name: databases.database.sample.third.party
-      version: v1alpha1    
-  description: operator-application
-  displayName: operator-application
+      version: v1alpha1
+  description: database-operator
+  displayName: database-operator
   icon:
   - base64data: ""
     mediatype: ""
@@ -45,76 +40,6 @@ spec:
     spec:
       clusterPermissions:
       - rules:
-        - apiGroups:
-          - application.sample.ibm.com
-          resources:
-          - applications
-          verbs:
-          - create
-          - delete
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
-          - application.sample.ibm.com
-          resources:
-          - applications/finalizers
-          verbs:
-          - update
-        - apiGroups:
-          - application.sample.ibm.com
-          resources:
-          - applications/status
-          verbs:
-          - get
-          - patch
-          - update
-        - apiGroups:
-          - ""
-          resources:
-          - secrets
-          verbs:
-          - create
-          - delete
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
-          - ""
-          resources:
-          - services
-          verbs:
-          - create
-          - delete
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
-          - apps
-          resources:
-          - deployments
-          verbs:
-          - create
-          - delete
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
-          - ""
-          resources:
-          - pods
-          verbs:
-          - get
-          - list
-          - watch
         - apiGroups:
           - database.sample.third.party
           resources:
@@ -128,6 +53,20 @@ spec:
           - update
           - watch
         - apiGroups:
+          - database.sample.third.party
+          resources:
+          - databases/finalizers
+          verbs:
+          - update
+        - apiGroups:
+          - database.sample.third.party
+          resources:
+          - databases/status
+          verbs:
+          - get
+          - patch
+          - update
+        - apiGroups:
           - authentication.k8s.io
           resources:
           - tokenreviews
@@ -139,9 +78,9 @@ spec:
           - subjectaccessreviews
           verbs:
           - create
-        serviceAccountName: operator-application-controller-manager
+        serviceAccountName: operator-database-controller-manager
       deployments:
-      - name: operator-application-controller-manager
+      - name: operator-database-controller-manager
         spec:
           replicas: 1
           selector:
@@ -180,7 +119,7 @@ spec:
                 - --leader-elect
                 command:
                 - /manager
-                image: docker.io/nheidloff/application-controller:v10
+                image: docker.io/nheidloff/database-controller:v1
                 livenessProbe:
                   httpGet:
                     path: /healthz
@@ -205,7 +144,7 @@ spec:
                   allowPrivilegeEscalation: false
               securityContext:
                 runAsNonRoot: true
-              serviceAccountName: operator-application-controller-manager
+              serviceAccountName: operator-database-controller-manager
               terminationGracePeriodSeconds: 10
       permissions:
       - rules:
@@ -240,7 +179,7 @@ spec:
           verbs:
           - create
           - patch
-        serviceAccountName: operator-application-controller-manager
+        serviceAccountName: operator-database-controller-manager
     strategy: deployment
   installModes:
   - supported: false
@@ -252,20 +191,13 @@ spec:
   - supported: true
     type: AllNamespaces
   keywords:
-  - go
-  - kubernetes
-  - golang
-  - devops
-  - automation
-  - operator
-  - k8s
-  - kubernetes-operator
-  - day2
+  - sample
+  - database-operator
   links:
-  - name: Operator Application
-    url: https://operator-application.domain
+  - name: Operator Database
+    url: https://operator-database.domain
   maturity: alpha
   provider:
-    name: sample.ibm.com
+    name: database.sample.third.party
     url: https://github.com/nheidloff/operator-sample-go
   version: 0.0.1
