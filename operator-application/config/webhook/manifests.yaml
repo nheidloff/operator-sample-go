@@ -6,7 +6,8 @@ metadata:
   name: mutating-webhook-configuration
 webhooks:
 - admissionReviewVersions:
-  - v1
+  - v1alpha1
+  - v1beta1
   clientConfig:
     service:
       name: webhook-service
@@ -33,7 +34,8 @@ metadata:
   name: validating-webhook-configuration
 webhooks:
 - admissionReviewVersions:
-  - v1
+  - v1alpha1
+  - v1beta1
   clientConfig:
     service:
       name: webhook-service
