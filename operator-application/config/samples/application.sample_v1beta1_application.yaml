@@ -4,7 +4,7 @@ metadata:
   name: application2
 spec:
   version: "1.0.0"
-  amountPods: 1
+  amountPods: 2
   databaseName: database
   databaseNamespace: database
   title: Movies
