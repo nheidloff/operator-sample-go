@@ -12,14 +12,14 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-application-sample-ibm-com-v1alpha1-application
+      path: /mutate-application-sample-ibm-com-v1beta1-application
   failurePolicy: Fail
   name: mapplication.kb.io
   rules:
   - apiGroups:
     - application.sample.ibm.com
     apiVersions:
-    - v1alpha1
+    - v1beta1
     operations:
     - CREATE
     - UPDATE
@@ -40,14 +40,14 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-application-sample-ibm-com-v1alpha1-application
+      path: /validate-application-sample-ibm-com-v1beta1-application
   failurePolicy: Fail
   name: vapplication.kb.io
   rules:
   - apiGroups:
     - application.sample.ibm.com
     apiVersions:
-    - v1alpha1
+    - v1beta1
     operations:
     - CREATE
     - UPDATE

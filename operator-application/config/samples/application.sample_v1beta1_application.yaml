@@ -1,10 +1,10 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: application-sample
+---
 apiVersion: application.sample.ibm.com/v1beta1
 kind: Application
 metadata:
-  name: application2
-spec:
-  version: "1.0.0"
-  amountPods: 1
-  databaseName: database
-  databaseNamespace: database
-  title: Movies
+  name: application-sample
+  namespace: application-sample
