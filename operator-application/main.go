@@ -14,9 +14,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	applicationsamplev1alpha1 "github.com/nheidloff/operator-sample-go/operator-application/api/v1alpha1"
-	applicationcontroller "github.com/nheidloff/operator-sample-go/operator-application/controllers/application"
 	databasesamplev1alpha1 "github.com/nheidloff/operator-sample-go/operator-database/api/v1alpha1"
+
+	applicationsamplev1alpha1 "github.com/nheidloff/operator-sample-go/operator-application/api/v1alpha1"
+	applicationsamplev1beta1 "github.com/nheidloff/operator-sample-go/operator-application/api/v1beta1"
+	applicationcontroller "github.com/nheidloff/operator-sample-go/operator-application/controllers/application"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -31,6 +33,7 @@ func init() {
 	utilruntime.Must(databasesamplev1alpha1.AddToScheme(scheme))
 
 	utilruntime.Must(applicationsamplev1alpha1.AddToScheme(scheme))
+	utilruntime.Must(applicationsamplev1beta1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -70,6 +73,12 @@ func main() {
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Application")
 		os.Exit(1)
+	}
+	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
+		if err = (&applicationsamplev1alpha1.Application{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Application")
+			os.Exit(1)
+		}
 	}
 	//+kubebuilder:scaffold:builder
 

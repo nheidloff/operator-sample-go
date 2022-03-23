@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	applicationsamplev1alpha1 "github.com/nheidloff/operator-sample-go/operator-application/api/v1alpha1"
+	applicationsamplev1beta1 "github.com/nheidloff/operator-sample-go/operator-application/api/v1beta1"
 	databasesamplev1alpha1 "github.com/nheidloff/operator-sample-go/operator-database/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -13,7 +13,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-func (reconciler *ApplicationReconciler) defineDatabase(application *applicationsamplev1alpha1.Application) *databasesamplev1alpha1.Database {
+func (reconciler *ApplicationReconciler) defineDatabase(application *applicationsamplev1beta1.Application) *databasesamplev1alpha1.Database {
 	database := &databasesamplev1alpha1.Database{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      application.Spec.DatabaseName,
@@ -32,7 +32,7 @@ func (reconciler *ApplicationReconciler) defineDatabase(application *application
 	return database
 }
 
-func (reconciler *ApplicationReconciler) reconcileDatabase(ctx context.Context, application *applicationsamplev1alpha1.Application) (ctrl.Result, error) {
+func (reconciler *ApplicationReconciler) reconcileDatabase(ctx context.Context, application *applicationsamplev1beta1.Application) (ctrl.Result, error) {
 	log := log.FromContext(ctx)
 	database := &databasesamplev1alpha1.Database{}
 	databaseDefinition := reconciler.defineDatabase(application)

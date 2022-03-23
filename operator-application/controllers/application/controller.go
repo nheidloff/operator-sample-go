@@ -15,7 +15,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	applicationsamplev1alpha1 "github.com/nheidloff/operator-sample-go/operator-application/api/v1alpha1"
+	applicationsamplev1beta1 "github.com/nheidloff/operator-sample-go/operator-application/api/v1beta1"
 )
 
 type ApplicationReconciler struct {
@@ -35,7 +35,7 @@ func (reconciler *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl
 	log := log.FromContext(ctx)
 	log.Info("Reconcile started")
 
-	application := &applicationsamplev1alpha1.Application{}
+	application := &applicationsamplev1beta1.Application{}
 	err := reconciler.Get(ctx, req.NamespacedName, application)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -120,7 +120,7 @@ func (reconciler *ApplicationReconciler) SetupWithManager(mgr ctrl.Manager) erro
 	managerConfig = mgr.GetConfig()
 
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&applicationsamplev1alpha1.Application{}).
+		For(&applicationsamplev1beta1.Application{}).
 		Owns(&appsv1.Deployment{}).
 		Owns(&corev1.Service{}).
 		Owns(&corev1.Secret{}).

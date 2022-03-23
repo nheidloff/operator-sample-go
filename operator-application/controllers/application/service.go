@@ -3,7 +3,7 @@ package applicationcontroller
 import (
 	"context"
 
-	applicationsamplev1alpha1 "github.com/nheidloff/operator-sample-go/operator-application/api/v1alpha1"
+	applicationsamplev1beta1 "github.com/nheidloff/operator-sample-go/operator-application/api/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -13,7 +13,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-func (reconciler *ApplicationReconciler) defineService(application *applicationsamplev1alpha1.Application) *corev1.Service {
+func (reconciler *ApplicationReconciler) defineService(application *applicationsamplev1beta1.Application) *corev1.Service {
 	labels := map[string]string{labelKey: labelValue}
 
 	service := &corev1.Service{
@@ -37,7 +37,7 @@ func (reconciler *ApplicationReconciler) defineService(application *applications
 	return service
 }
 
-func (reconciler *ApplicationReconciler) reconcileService(ctx context.Context, application *applicationsamplev1alpha1.Application) (ctrl.Result, error) {
+func (reconciler *ApplicationReconciler) reconcileService(ctx context.Context, application *applicationsamplev1beta1.Application) (ctrl.Result, error) {
 	log := log.FromContext(ctx)
 	serviceDefinition := reconciler.defineService(application)
 	service := &corev1.Service{}

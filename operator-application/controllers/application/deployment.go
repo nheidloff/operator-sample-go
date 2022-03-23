@@ -3,7 +3,7 @@ package applicationcontroller
 import (
 	"context"
 
-	applicationsamplev1alpha1 "github.com/nheidloff/operator-sample-go/operator-application/api/v1alpha1"
+	applicationsamplev1beta1 "github.com/nheidloff/operator-sample-go/operator-application/api/v1beta1"
 	"github.com/nheidloff/operator-sample-go/operator-application/utilities"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -16,7 +16,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-func (reconciler *ApplicationReconciler) defineDeployment(application *applicationsamplev1alpha1.Application) *appsv1.Deployment {
+func (reconciler *ApplicationReconciler) defineDeployment(application *applicationsamplev1beta1.Application) *appsv1.Deployment {
 	replicas := application.Spec.AmountPods
 	labels := map[string]string{labelKey: labelValue}
 
@@ -81,7 +81,7 @@ func (reconciler *ApplicationReconciler) defineDeployment(application *applicati
 	return deployment
 }
 
-func (reconciler *ApplicationReconciler) reconcileDeployment(ctx context.Context, application *applicationsamplev1alpha1.Application) (ctrl.Result, error) {
+func (reconciler *ApplicationReconciler) reconcileDeployment(ctx context.Context, application *applicationsamplev1beta1.Application) (ctrl.Result, error) {
 	log := log.FromContext(ctx)
 	deployment := &appsv1.Deployment{}
 	deploymentDefinition := reconciler.defineDeployment(application)

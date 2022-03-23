@@ -3,7 +3,7 @@ package applicationcontroller
 import (
 	"context"
 
-	applicationsamplev1alpha1 "github.com/nheidloff/operator-sample-go/operator-application/api/v1alpha1"
+	applicationsamplev1beta1 "github.com/nheidloff/operator-sample-go/operator-application/api/v1beta1"
 	"github.com/nheidloff/operator-sample-go/operator-application/utilities"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -19,7 +19,7 @@ const CONDITION_REASON_RESOURCE_FOUND = "ResourceFound"
 const CONDITION_MESSAGE_RESOURCE_FOUND = "Resource found in k18n"
 
 func (reconciler *ApplicationReconciler) setConditionResourceFound(ctx context.Context,
-	application *applicationsamplev1alpha1.Application) error {
+	application *applicationsamplev1beta1.Application) error {
 
 	if !reconciler.containsCondition(ctx, application, CONDITION_REASON_RESOURCE_FOUND) {
 		return utilities.AppendCondition(ctx, reconciler.Client, application, CONDITION_TYPE_RESOURCE_FOUND, CONDITION_STATUS_TRUE,
@@ -34,7 +34,7 @@ const CONDITION_REASON_INSTALL_READY = "AllRequirementsMet"
 const CONDITION_MESSAGE_INSTALL_READY = "All requirements met, attempting install"
 
 func (reconciler *ApplicationReconciler) setConditionInstallReady(ctx context.Context,
-	application *applicationsamplev1alpha1.Application) error {
+	application *applicationsamplev1beta1.Application) error {
 
 	reconciler.deleteCondition(ctx, application, CONDITION_TYPE_FAILED, CONDITION_REASON_FAILED_INSTALL_READY)
 	if !reconciler.containsCondition(ctx, application, CONDITION_REASON_INSTALL_READY) {
@@ -50,7 +50,7 @@ const CONDITION_REASON_FAILED_INSTALL_READY = "RequirementsNotMet"
 const CONDITION_MESSAGE_FAILED_INSTALL_READY = "Not all requirements met"
 
 func (reconciler *ApplicationReconciler) setConditionFailed(ctx context.Context,
-	application *applicationsamplev1alpha1.Application, reason string) error {
+	application *applicationsamplev1beta1.Application, reason string) error {
 
 	var message string
 	switch reason {
@@ -71,7 +71,7 @@ const CONDITION_REASON_DATABASE_EXISTS = "DatabaseExists"
 const CONDITION_MESSAGE_DATABASE_EXISTS = "The database exists"
 
 func (reconciler *ApplicationReconciler) setConditionDatabaseExists(ctx context.Context,
-	application *applicationsamplev1alpha1.Application, status metav1.ConditionStatus) error {
+	application *applicationsamplev1beta1.Application, status metav1.ConditionStatus) error {
 
 	if !reconciler.containsCondition(ctx, application, CONDITION_REASON_DATABASE_EXISTS) {
 		return utilities.AppendCondition(ctx, reconciler.Client, application, CONDITION_TYPE_DATABASE_EXISTS, status,
@@ -93,7 +93,7 @@ const CONDITION_REASON_SUCCEEDED = "InstallSucceeded"
 const CONDITION_MESSAGE_SUCCEEDED = "Application has been installed"
 
 func (reconciler *ApplicationReconciler) setConditionSucceeded(ctx context.Context,
-	application *applicationsamplev1alpha1.Application) error {
+	application *applicationsamplev1beta1.Application) error {
 
 	if !reconciler.containsCondition(ctx, application, CONDITION_REASON_SUCCEEDED) {
 		return utilities.AppendCondition(ctx, reconciler.Client, application, CONDITION_TYPE_SUCCEEDED, CONDITION_STATUS_TRUE,
@@ -108,7 +108,7 @@ const CONDITION_REASON_DELETION_REQUEST_RECEIVED = "DeletionRequestReceived"
 const CONDITION_MESSAGE_DELETION_REQUEST_RECEIVED = "Application is supposed to be deleted"
 
 func (reconciler *ApplicationReconciler) setConditionDeletionRequestReceived(ctx context.Context,
-	application *applicationsamplev1alpha1.Application) error {
+	application *applicationsamplev1beta1.Application) error {
 
 	if !reconciler.containsCondition(ctx, application, CONDITION_REASON_DELETION_REQUEST_RECEIVED) {
 		return utilities.AppendCondition(ctx, reconciler.Client, application, CONDITION_TYPE_DELETION_REQUEST_RECEIVED, CONDITION_STATUS_TRUE,
@@ -117,7 +117,7 @@ func (reconciler *ApplicationReconciler) setConditionDeletionRequestReceived(ctx
 	return nil
 }
 
-func (reconciler *ApplicationReconciler) getConditionStatus(ctx context.Context, application *applicationsamplev1alpha1.Application,
+func (reconciler *ApplicationReconciler) getConditionStatus(ctx context.Context, application *applicationsamplev1beta1.Application,
 	typeName string) metav1.ConditionStatus {
 
 	var output metav1.ConditionStatus = CONDITION_STATUS_UNKNOWN
@@ -129,7 +129,7 @@ func (reconciler *ApplicationReconciler) getConditionStatus(ctx context.Context,
 	return output
 }
 
-func (reconciler *ApplicationReconciler) deleteCondition(ctx context.Context, application *applicationsamplev1alpha1.Application,
+func (reconciler *ApplicationReconciler) deleteCondition(ctx context.Context, application *applicationsamplev1beta1.Application,
 	typeName string, reason string) error {
 
 	log := log.FromContext(ctx)
@@ -150,7 +150,7 @@ func (reconciler *ApplicationReconciler) deleteCondition(ctx context.Context, ap
 
 // TODO: Move to uti
 func (reconciler *ApplicationReconciler) containsCondition(ctx context.Context,
-	application *applicationsamplev1alpha1.Application, reason string) bool {
+	application *applicationsamplev1beta1.Application, reason string) bool {
 
 	output := false
 	for _, condition := range application.Status.Conditions {

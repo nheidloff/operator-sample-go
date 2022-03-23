@@ -13,4 +13,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: docker.io/nheidloff/application-controller
-  newTag: v11
+  newTag: v21

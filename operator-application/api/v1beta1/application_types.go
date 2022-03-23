@@ -1,4 +1,4 @@
-package v1alpha1
+package v1beta1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,6 +16,7 @@ type ApplicationSpec struct {
 	DatabaseNamespace string `json:"databaseNamespace,omitempty"`
 	// +kubebuilder:default:="https://raw.githubusercontent.com/IBM/multi-tenancy/main/installapp/postgres-config/create-populate-tenant-a.sql"
 	SchemaUrl string `json:"schemaUrl,omitempty"`
+	Title     string `json:"title,omitempty"`
 }
 
 type ApplicationStatus struct {
@@ -29,7 +30,6 @@ type ApplicationStatus struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
-//+kubebuilder:storageversion
 
 type Application struct {
 	metav1.TypeMeta   `json:",inline"`
