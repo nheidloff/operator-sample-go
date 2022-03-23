@@ -12,4 +12,6 @@ spec:
           namespace: system
           name: webhook-service
           path: /convert
-      conversionReviewVersions: ["v1alpha1", "v1beta1"]
+      conversionReviewVersions:
+      - v1alpha1
+      - v1beta1
