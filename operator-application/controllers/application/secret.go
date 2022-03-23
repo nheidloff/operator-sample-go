@@ -3,7 +3,7 @@ package applicationcontroller
 import (
 	"context"
 
-	applicationsamplev1alpha1 "github.com/nheidloff/operator-sample-go/operator-application/api/v1alpha1"
+	applicationsamplev1beta1 "github.com/nheidloff/operator-sample-go/operator-application/api/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -12,7 +12,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-func (reconciler *ApplicationReconciler) defineSecret(application *applicationsamplev1alpha1.Application) *corev1.Secret {
+func (reconciler *ApplicationReconciler) defineSecret(application *applicationsamplev1beta1.Application) *corev1.Secret {
 	stringData := make(map[string]string)
 	stringData[secretGreetingMessageLabel] = greetingMessage
 
@@ -29,7 +29,7 @@ func (reconciler *ApplicationReconciler) defineSecret(application *applicationsa
 	return secret
 }
 
-func (reconciler *ApplicationReconciler) reconcileSecret(ctx context.Context, application *applicationsamplev1alpha1.Application) (ctrl.Result, error) {
+func (reconciler *ApplicationReconciler) reconcileSecret(ctx context.Context, application *applicationsamplev1beta1.Application) (ctrl.Result, error) {
 	log := log.FromContext(ctx)
 	secret := &corev1.Secret{}
 	secretDefinition := reconciler.defineSecret(application)

@@ -3,7 +3,7 @@ package applicationcontroller
 import (
 	"fmt"
 
-	applicationsamplev1alpha1 "github.com/nheidloff/operator-sample-go/operator-application/api/v1alpha1"
+	applicationsamplev1beta1 "github.com/nheidloff/operator-sample-go/operator-application/api/v1beta1"
 	"k8s.io/client-go/rest"
 )
 
@@ -30,7 +30,7 @@ const databasePassword string = "password"
 const databaseUrl string = "url"
 const databaseCertificate string = "certificate"
 
-func (reconciler *ApplicationReconciler) setGlobalVariables(application *applicationsamplev1alpha1.Application) {
+func (reconciler *ApplicationReconciler) setGlobalVariables(application *applicationsamplev1beta1.Application) {
 	secretName = application.Name + "-secret-greeting"
 	deploymentName = application.Name + "-deployment-microservice"
 	serviceName = application.Name + "-service-microservice"
@@ -38,7 +38,7 @@ func (reconciler *ApplicationReconciler) setGlobalVariables(application *applica
 	// TODO: Handle application.Spec.Version
 }
 
-func (reconciler *ApplicationReconciler) printVariables(application *applicationsamplev1alpha1.Application) {
+func (reconciler *ApplicationReconciler) printVariables(application *applicationsamplev1beta1.Application) {
 	fmt.Println("Custom Resource Values:")
 	fmt.Printf("- Name: %s\n", application.Name)
 	fmt.Printf("- Namespace: %s\n", application.Namespace)

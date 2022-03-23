@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	applicationsamplev1alpha1 "github.com/nheidloff/operator-sample-go/operator-application/api/v1alpha1"
+	applicationsamplev1beta1 "github.com/nheidloff/operator-sample-go/operator-application/api/v1beta1"
 	databasesamplev1alpha1 "github.com/nheidloff/operator-sample-go/operator-database/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -12,7 +12,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
-func (reconciler *ApplicationReconciler) finalizeApplication(ctx context.Context, application *applicationsamplev1alpha1.Application) error {
+func (reconciler *ApplicationReconciler) finalizeApplication(ctx context.Context, application *applicationsamplev1beta1.Application) error {
 	database := &databasesamplev1alpha1.Database{}
 	err := reconciler.Get(ctx, types.NamespacedName{Name: application.Spec.DatabaseName, Namespace: application.Spec.DatabaseNamespace}, database)
 	if err != nil {
@@ -23,7 +23,7 @@ func (reconciler *ApplicationReconciler) finalizeApplication(ctx context.Context
 	return fmt.Errorf("Database not deleted yet")
 }
 
-func (reconciler *ApplicationReconciler) addFinalizer(ctx context.Context, application *applicationsamplev1alpha1.Application) (ctrl.Result, error) {
+func (reconciler *ApplicationReconciler) addFinalizer(ctx context.Context, application *applicationsamplev1beta1.Application) (ctrl.Result, error) {
 	if !controllerutil.ContainsFinalizer(application, finalizer) {
 		controllerutil.AddFinalizer(application, finalizer)
 		err := reconciler.Update(ctx, application)
@@ -34,7 +34,7 @@ func (reconciler *ApplicationReconciler) addFinalizer(ctx context.Context, appli
 	return ctrl.Result{}, nil
 }
 
-func (reconciler *ApplicationReconciler) tryDeletions(ctx context.Context, application *applicationsamplev1alpha1.Application) (ctrl.Result, error) {
+func (reconciler *ApplicationReconciler) tryDeletions(ctx context.Context, application *applicationsamplev1beta1.Application) (ctrl.Result, error) {
 	isApplicationMarkedToBeDeleted := application.GetDeletionTimestamp() != nil
 	if isApplicationMarkedToBeDeleted {
 		if controllerutil.ContainsFinalizer(application, finalizer) {

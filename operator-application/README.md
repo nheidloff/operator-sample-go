@@ -9,6 +9,8 @@ There are three ways to run the operator:
 1) [Local Go Operator](#setup-and-local-usage) 
 2) [Kubernetes Operator manually deployed](#setup-and-manual-deployment)
 3) [Kubernetes Operator deployed via OLM](#setup-and-deployment-via-operator-lifecycle-manager)
+    * via operator-sdk
+    * via kubectl
 
 ### Prerequisites
 
@@ -17,6 +19,16 @@ There are three ways to run the operator:
 * kubectl
 * docker
 * [ibmcloud](https://cloud.ibm.com/docs/cli?topic=cli-install-ibmcloud-cli) (if IBM Cloud is used)
+
+*Image Registry*
+
+```
+$ export REGISTRY='docker.io'
+$ export ORG='nheidloff'
+$ export IMAGE='application-controller:v22'
+$ export BUNDLE_IMAGE="application-controller-bundle:v16"
+$ export CATALOG_IMAGE="application-controller-catalog:v1"
+```
 
 ### Setup and local Usage
 
@@ -88,27 +100,30 @@ Configure Kubernetes:
 ```
 $ kubectl create ns test1
 $ kubectl config set-context --current --namespace=test1
-$ kubectl create ns database
-$ kubectl apply -f ../operator-database/config/crd/bases/database.sample.third.party_databases.yaml
 $ kubectl apply -f https://github.com/jetstack/cert-manager/releases/latest/download/cert-manager.yaml
+```
+
+Deploy Database Operator:
+
+Before running the application-controller-bundle (the application operator), the database operator needs to be deployed since it is defined as 'required' in the application CSV.
+
+```
+$ kubectl create ns database
+$ cd ../operator-database
+$ export BUNDLE_IMAGE_DATABASE="database-controller-bundle:v1"
+$ operator-sdk run bundle "$REGISTRY/$ORG/$BUNDLE_IMAGE_DATABASE" -n operators
+$ cd ../operator-application
 ```
 
 Build and push the Operator Image:
 
 ```
-$ export REGISTRY='docker.io'
-$ export ORG='nheidloff'
-$ export IMAGE='application-controller:v16'
-$ make generate
-$ make manifests
-$ make docker-build IMG="$REGISTRY/$ORG/$IMAGE"
+$ make generate manifests
 $ docker login $REGISTRY
-$ docker push "$REGISTRY/$ORG/$IMAGE"
+$ make docker-build docker-push IMG="$REGISTRY/$ORG/$IMAGE"
 ```
 
 Deploy Operator:
-
-Namespace will be the project name defined in 'Project' plus '-system'.
 
 ```
 $ make deploy IMG="$REGISTRY/$ORG/$IMAGE"
@@ -120,7 +135,6 @@ Test Operator:
 
 ```
 $ kubectl apply -f config/samples/application.sample_v1alpha1_application.yaml
-$ kubectl delete -f config/samples/application.sample_v1alpha1_application.yaml
 ```
 
 The sample endpoint can be triggered via '<your-ip>:30548/hello':
@@ -130,15 +144,16 @@ $ ibmcloud ks worker ls --cluster niklas-heidloff-fra02-b3c.4x16
 $ open http://159.122.86.194:30548/hello
 ```
 
-Delete Operator:
+Delete Resources:
 
 ```
-$ make undeploy
+$ kubectl delete -f config/samples/application.sample_v1alpha1_application.yaml
+$ make undeploy IMG="$REGISTRY/$ORG/$IMAGE"
 ```
 
 ### Setup and Deployment via Operator Lifecycle Manager
 
-Follow the same steps as above in the section [Setup and manual Deployment](#setup-and-manual-deployment) up to the step 'Deploy Operator' (expect that you don't have to deploy the application custom resource definition).
+Follow the same steps as above in the section [Setup and manual Deployment](#setup-and-manual-deployment) up to the step 'Deploy Operator'.
 
 Install the Operator Lifecycle Manager (OLM):
 
@@ -150,28 +165,48 @@ $ kubectl get all -n olm
 Build and push the Bundle Image:
 
 ```
-$ export REGISTRY='docker.io'
-$ export ORG='nheidloff'
-$ export BUNDLEIMAGE="application-controller-bundle:v15"
-$ make bundle-build BUNDLE_IMG="$REGISTRY/$ORG/$BUNDLEIMAGE"
-$ docker push "$REGISTRY/$ORG/$BUNDLEIMAGE"
+$ make bundle-build docker-push BUNDLE_IMG="$REGISTRY/$ORG/$BUNDLE_IMAGE" IMG="$REGISTRY/$ORG/$BUNDLE_IMAGE"
 ```
 
-Before running the application-controller-bundle (the application operator), the database operator needs to be deployed since it is defined as 'required' in the application CSV.
+**Deploy the Operator**
+
+There are two ways to deploy the operator:
+
+1) operator-sdk (all necessary resources are created)
+2) kubectl (resources defined in yaml)
+
+*operator-sdk:*
 
 ```
-$ cd ../operator-database
-$ export BUNDLEIMAGEDATABASE="database-controller-bundle:v1"
-$ operator-sdk run bundle "$REGISTRY/$ORG/$BUNDLEIMAGEDATABASE" -n operators
-$ cd ../operator-application
+$ operator-sdk run bundle "$REGISTRY/$ORG/$BUNDLE_IMAGE" -n operators
 ```
 
-```
-$ operator-sdk run bundle "$REGISTRY/$ORG/$BUNDLEIMAGE" -n operators
-$ oc get csv operator-application.v0.0.1 -oyaml
-```
+*kubectl:*
+
+to be done
 
 To test the operator, follow the instructions at the bottom of the section [Setup and manual Deployment](#setup-and-manual-deployment).
+
+Verify Installation:
+
+```
+$ kubectl get all -n operators
+$ kubectl get catalogsource operator-application-catalog -n operators -oyaml
+$ kubectl get subscriptions operator-application-v0-0-1-sub -n operators -oyaml
+$ kubectl get csv operator-application.v0.0.1 -n operators -oyaml
+$ kubectl get installplans -n operators
+$ kubectl get installplans install-xxxxx -n operators -oyaml
+$ kubectl get operators operator-application.operators -oyaml
+```
+
+Delete Resources:
+
+```
+$ kubectl delete -f config/samples/application.sample_v1alpha1_application.yaml
+$ operator-sdk cleanup operator-application -n operators --delete-all
+$ kubectl apply -f ../operator-database/config/crd/bases/database.sample.third.party_databases.yaml
+$ operator-sdk olm uninstall
+```
 
 ### Development Commands
 
@@ -187,9 +222,6 @@ $ make manifests
 Commands for the bundle creation:
 
 ```
-$ export REGISTRY='docker.io'
-$ export ORG='nheidloff'
-$ export IMAGE='application-controller:v10'
 $ make bundle IMG="$REGISTRY/$ORG/$IMAGE"
 ```
 
