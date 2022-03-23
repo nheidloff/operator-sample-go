@@ -183,6 +183,7 @@ $ operator-sdk run bundle "$REGISTRY/$ORG/$BUNDLE_IMAGE" -n operators
 
 *kubectl:*
 
+TODO: This doesn't work yet!
 ```
 $ kubectl apply -f olm/catalogsource.yaml
 $ kubectl apply -f olm/subscription.yaml 

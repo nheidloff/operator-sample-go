@@ -5,7 +5,7 @@ metadata:
   namespace: operators
 spec:
   channel: alpha
-  installPlanApproval: Automatic
+  installPlanApproval: Manual
   name: operator-application
   source: operator-application-catalog
   sourceNamespace: operators
