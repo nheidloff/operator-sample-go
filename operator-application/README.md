@@ -183,7 +183,10 @@ $ operator-sdk run bundle "$REGISTRY/$ORG/$BUNDLE_IMAGE" -n operators
 
 *kubectl:*
 
-to be done
+```
+$ kubectl apply -f olm/catalogsource.yaml
+$ kubectl apply -f olm/subscription.yaml 
+```
 
 To test the operator, follow the instructions at the bottom of the section [Setup and manual Deployment](#setup-and-manual-deployment).
 
@@ -196,7 +199,7 @@ $ kubectl get subscriptions operator-application-v0-0-1-sub -n operators -oyaml
 $ kubectl get csv operator-application.v0.0.1 -n operators -oyaml
 $ kubectl get installplans -n operators
 $ kubectl get installplans install-xxxxx -n operators -oyaml
-$ kubectl get operators operator-application.operators -oyaml
+$ kubectl get operators operator-application.operators -n operators -oyaml
 ```
 
 Delete Resources:
@@ -232,4 +235,10 @@ $ operator-sdk create webhook --group application.sample --version v1alpha1 --ki
 $ make manifests
 $ make install
 $ make run ENABLE_WEBHOOKS=false
+```
+
+Command to create catalog:
+
+```
+$ make catalog-build docker-push CATALOG_IMG="$REGISTRY/$ORG/$CATALOG_IMAGE" BUNDLE_IMGS="$REGISTRY/$ORG/$BUNDLE_IMAGE" IMG="$REGISTRY/$ORG/$CATALOG_IMAGE"
 ```
