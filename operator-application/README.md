@@ -1,4 +1,4 @@
-# operator-application
+# Setup Options and Prerequisites
 
 See below for instructions how to set up and run the application operator as well as the used commands for the development of it.
 
