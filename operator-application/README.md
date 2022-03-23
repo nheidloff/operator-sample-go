@@ -183,10 +183,11 @@ $ operator-sdk run bundle "$REGISTRY/$ORG/$BUNDLE_IMAGE" -n operators
 
 *kubectl:*
 
-TODO: This doesn't work yet!
 ```
 $ kubectl apply -f olm/catalogsource.yaml
 $ kubectl apply -f olm/subscription.yaml 
+$ kubectl get installplans -n operators
+$ kubectl -n operators patch installplan install-xxxxx -p '{"spec":{"approved":true}}' --type merge
 ```
 
 To test the operator, follow the instructions at the bottom of the section [Setup and manual Deployment](#setup-and-manual-deployment).
@@ -203,12 +204,21 @@ $ kubectl get installplans install-xxxxx -n operators -oyaml
 $ kubectl get operators operator-application.operators -n operators -oyaml
 ```
 
-Delete Resources:
+Delete Resources (operator-sdk):
 
 ```
 $ kubectl delete -f config/samples/application.sample_v1alpha1_application.yaml
 $ operator-sdk cleanup operator-application -n operators --delete-all
 $ kubectl apply -f ../operator-database/config/crd/bases/database.sample.third.party_databases.yaml
+$ operator-sdk olm uninstall
+```
+
+Delete Resources (kubectl):
+
+```
+$ kubectl delete -f config/samples/application.sample_v1alpha1_application.yaml
+$ kubectl delete -f olm/catalogsource.yaml
+$ kubectl delete -f olm/subscription.yaml
 $ operator-sdk olm uninstall
 ```
 

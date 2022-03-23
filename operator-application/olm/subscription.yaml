@@ -4,8 +4,8 @@ metadata:
   name: operator-application-v0-0-1-sub
   namespace: operators
 spec:
-  channel: alpha
-  installPlanApproval: Manual
+  channel: "alpha"
+  installPlanApproval: Automatic
   name: operator-application
   source: operator-application-catalog
   sourceNamespace: operators

@@ -8,6 +8,3 @@ spec:
   publisher: Niklas Heidloff
   sourceType: grpc
   image: docker.io/nheidloff/application-controller-catalog:v1
-  updateStrategy:
-    registryPoll:
-      interval: 10m
