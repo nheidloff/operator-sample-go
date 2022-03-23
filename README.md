@@ -1,18 +1,12 @@
 # operator-sample-go
 
-This project contains Kubernetes operator samples that demonstrate best practices how to develop operators with Go and the Operator SDK.
+This project contains Kubernetes operator samples that demonstrate best practices how to develop operators with [Golang](https://go.dev/), [Operator SDK](https://sdk.operatorframework.io/) including [Kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) and the [Operator (OLM) Framework](https://operatorframework.io/).
 
 ### Setup
 
-The project contains a custom application controller, a database controller simulating an external resource and a sample microservice. The easiest way to get started is to run the application controller only and refer to the database resource definition and the built microservice image on Docker.io.
+There are various ways to run and deploy the samples. Check out the [setup instructions](operator-application/README.md).
 
-Follow these [instructions](operator-application/README.md#setup-and-local-usage) to run the application controller.
-
-See the readme documents for all components:
-
-* [Database operator](operator-application/README.md)
-* [Microservice](simple-microservice/README.md)
-* [Application operator](operator-application/README.md)
+There is a custom application controller, a database controller simulating an external resource and a sample microservice. The easiest way to get started is to run the application controller locally and to use pre-built images for the dependencies. 
 
 ### Documentation
 
@@ -26,33 +20,23 @@ See the readme documents for all components:
 * [Manually deploying Operators to Kubernetes](http://heidloff.net/article/manually-deploying-operators-to-kubernetes/)
 * [Deploying Operators with the Operator Lifecycle Manager](http://heidloff.net/article/deploying-operators-operator-lifecycle-manager-olm/)
 
-### Undocumented Capabilities
+### Capabilities to be added
 
-* Setup of watchers
-    * Code: [snippet](https://github.com/nheidloff/operator-sample-go/blob/aa9fd15605a54f712e1233423236bd152940f238/operator-application/controllers/application_controller.go#L218)
-
-### Capabilities To Be Added
-
-* Deployment/bundling
-* Setup of RBAC
-* Life cycle manager
 * Versioning
 * Webhooks
 * Metrics
 * Events
-* Operator cleanup
-* Scope: namespace vs global
 * Phase 3 - 5
 * Testing
 * Leader strategy
-* Creations of database schemas
-* Templates for customizability
-* Stateful resources (via uid, resourceVersion and in-memory store)
+* Customizable templates
+* Stateful resources
 
 ### Resources
 
-* [Operator SDK](https://sdk.operatorframework.io/docs/overview/)
-* [Operator SDK Best Practices](https://sdk.operatorframework.io/docs/best-practices/best-practices/)
+* [Operator SDK Documentation](https://sdk.operatorframework.io/docs/overview/)
+* [Kubebuilder Book](https://book.kubebuilder.io/)
+* [Operator Framework (OLM) Documentation](https://olm.operatorframework.io/docs/)
 * [Intro to the Operator Lifecycle Manager](https://www.youtube.com/watch?v=5PorcMTYZTo)
 * [Go Modules](https://www.youtube.com/watch?v=Z1VhG7cf83M)
 * [Resources to build Kubernetes Operators](http://heidloff.net/articles/resources-to-build-kubernetes-operators/)
