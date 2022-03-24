@@ -10,17 +10,11 @@ resources:
 - api:
     crdVersion: v1
     namespaced: true
-  controller: true
   domain: ibm.com
   group: application.sample
   kind: Application
   path: github.com/nheidloff/operator-sample-go/operator-application/api/v1alpha1
   version: v1alpha1
-  webhooks:
-    conversion: true
-    defaulting: true
-    validation: true
-    webhookVersion: v1
 - api:
     crdVersion: v1
     namespaced: true
@@ -30,4 +24,8 @@ resources:
   kind: Application
   path: github.com/nheidloff/operator-sample-go/operator-application/api/v1beta1
   version: v1beta1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 version: "3"
