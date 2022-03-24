@@ -9,7 +9,10 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspace}/.."
+            "program": "${workspace}/..",
+            "env": {
+                "ENABLE_WEBHOOKS": "false"
+              }
         }
     ]
 }

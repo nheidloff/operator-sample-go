@@ -20,12 +20,16 @@ There are three ways to run the operator:
 * docker
 * [ibmcloud](https://cloud.ibm.com/docs/cli?topic=cli-install-ibmcloud-cli) (if IBM Cloud is used)
 
+*Operator SDK*
+
+The repo has been tested with operator-sdk v1.18.1. Note that there is an issue with this version. It doesn't download the tools in the 'bin' directory. You need to use an older version, init a new temporary new project and copy the files.
+
 *Image Registry*
 
 ```
 $ export REGISTRY='docker.io'
 $ export ORG='nheidloff'
-$ export IMAGE='application-controller:v22'
+$ export IMAGE='application-controller:v31'
 $ export BUNDLE_IMAGE="application-controller-bundle:v16"
 $ export CATALOG_IMAGE="application-controller-catalog:v1"
 ```
