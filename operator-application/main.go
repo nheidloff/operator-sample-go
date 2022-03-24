@@ -75,7 +75,7 @@ func main() {
 		os.Exit(1)
 	}
 	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
-		if err = (&applicationsamplev1alpha1.Application{}).SetupWebhookWithManager(mgr); err != nil {
+		if err = (&applicationsamplev1beta1.Application{}).SetupWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create webhook", "webhook", "Application")
 			os.Exit(1)
 		}
