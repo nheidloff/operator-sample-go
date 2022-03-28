@@ -4,7 +4,7 @@ This project contains Kubernetes operator samples that demonstrate best practice
 
 **Important:** This project has been moved to [github.com/ibm/operator-sample-go](https://github.com/IBM/operator-sample-go).
 
-### Documentation
+Documentation:
 
 * [Creating and updating Resources from Operators](http://heidloff.net/article/updating-resources-kubernetes-operators/)
 * [Deleting Resources in Operators](http://heidloff.net/article/deleting-resources-kubernetes-operators/)
