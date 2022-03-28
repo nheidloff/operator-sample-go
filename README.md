@@ -2,7 +2,7 @@
 
 This project contains Kubernetes operator samples that demonstrate best practices how to develop operators with [Golang](https://go.dev/), [Operator SDK](https://sdk.operatorframework.io/) including [Kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) and the [Operator (OLM) Framework](https://operatorframework.io/).
 
-🔴IMPORTANT: This project has been moved to [github.com/ibm/operator-sample-go](https://github.com/IBM/operator-sample-go).
+🔴 IMPORTANT: This project has been moved to [github.com/ibm/operator-sample-go](https://github.com/IBM/operator-sample-go).
 
 Documentation:
 
